@@ -1,0 +1,353 @@
+version: '3'
+
+# templates
+x-resident: &resident
+  restart: unless-stopped
+  logging:
+    driver: json-file
+    options:
+      max-size: 128m
+      max-file: 1
+
+x-oneshot: &oneshot
+  # prevent startup with `docker-compose up -d`
+  profiles:
+    - oneshot
+
+x-l1-geth: &l1-geth
+  image: golang:1.17-stretch
+  entrypoint: /bin/sh /l1/validator/entrypoint.sh
+  links:
+    - l1-bootnode
+
+x-l1-geth-env: &l1-geth-env
+  NETWORK_ID: $L1_CHAIN_ID
+  KEYSTORE: /l1/validator/keystore
+  GENESIS: /l1/validator/genesis.json
+  BOOTNODES: enode://e521ad93c7aa24a33a2e57a6be9c1e63ed39bd5a76245c5f8c004e7dac650adf70bee6354a7a9a83322cbb2f9458f6004259b6080ed4c5c3d689d4eef2e6a5a5@l1-bootnode:30301
+
+services:
+  # L1 Services
+  l1-builder:
+    <<: *oneshot
+    image: golang:1.17-stretch
+    entrypoint: make
+    working_dir: /app
+    volumes:
+      - $L1_GETH_REPO:/app
+      # dependency cache
+      - ./data/l1-builder/go-build:/root/.cache/go-build
+      - ./data/l1-builder/go:/go
+
+  ## Staking Dashboard
+  l1-web:
+    <<: *resident
+    image: nginx:1.25
+    environment:
+      L1_CHAIN_ID: $L1_CHAIN_ID
+      L1_RPC: 'http://127.0.0.1:$L1_ETH_RPC_HTTP_PORT/'
+      L1_EXPLORER: 'http://127.0.0.1:$L1_BLOCKSCOUT_PORT/'
+      OP_CHAIN_ID: $OP_CHAIN_ID
+      OP_RPC: 'http://127.0.0.1:$OP_ETH_RPC_HTTP_PORT/'
+      OP_EXPLORER: 'http://127.0.0.1:$OP_BLOCKSCOUT_PORT/'
+    volumes:
+      - ./l1/web/index.html:/usr/share/nginx/html/index.html:ro
+      - ./l1/web/abis.js:/usr/share/nginx/html/abis.js:ro
+      - ./l1/web/99-create-config.sh:/docker-entrypoint.d/99-create-config.sh:ro
+    ports:
+      - $L1_WEB_PORT:80/tcp
+
+  ## Bootstrap node
+  l1-bootnode:
+    <<: *resident
+    image: golang:1.17-stretch
+    entrypoint: /usr/local/bin/bootnode
+    command: -nodekeyhex d0abe73e1fcef53dbbb5a9289cec5a15b58781b3503f284a2154e115f2f2d38f
+    volumes:
+      - $L1_GETH_REPO/build/bin:/usr/local/bin:ro
+
+  ## RPC
+  l1-rpc:
+    <<: [*resident, *l1-geth]
+    environment:
+      <<: *l1-geth-env
+      OPTS: '--rpc.allow-unprotected-txs'
+    volumes:
+      - ./l1:/l1:ro
+      - $L1_GETH_REPO/build/bin:/usr/local/bin:ro
+      - ./data/l1-rpc:/root/.ethereum
+    ports:
+      - $L1_ETH_RPC_HTTP_PORT:8545/tcp
+      - $L1_ETH_RPC_WS_PORT:8546/tcp
+
+  ## Validator(1)
+  l1-validator1:
+    <<: [*resident, *l1-geth]
+    environment:
+      <<: *l1-geth-env
+      ETHERBASE: '0xA889698683900857FA9AC54FBC972e88292b5387'
+    volumes:
+      - ./l1:/l1:ro
+      - $L1_GETH_REPO/build/bin:/usr/local/bin:ro
+      - ./data/l1-validator1:/root/.ethereum
+
+  ## Validator(2)
+  l1-validator2:
+    <<: [*resident, *oneshot, *l1-geth]
+    environment:
+      <<: *l1-geth-env
+      ETHERBASE: '0xB07F340E051cc0db4d9d4fD115B148993994DddD'
+    volumes:
+      - ./l1:/l1:ro
+      - $L1_GETH_REPO/build/bin:/usr/local/bin:ro
+      - ./data/l1-validator2:/root/.ethereum
+
+  ## Validator(3)
+  l1-validator3:
+    <<: [*resident, *oneshot, *l1-geth]
+    environment:
+      <<: *l1-geth-env
+      ETHERBASE: '0x9a8490E0faE649cA0ED0b221E4FadCa9a44Cd93e'
+    volumes:
+      - ./l1:/l1:ro
+      - $L1_GETH_REPO/build/bin:/usr/local/bin:ro
+      - ./data/l1-validator3:/root/.ethereum
+
+  ## Explorer
+  l1-blockscout:
+    <<: *resident
+    image: ghcr.io/oasysgames/oasys-blockscout:v5.2.1-beta1
+    environment:
+      NETWORK: ' '
+      SUBNETWORK: 'Private Hub-Layer'
+      ETHEREUM_JSONRPC_VARIANT: geth
+      ETHEREUM_JSONRPC_HTTP_URL: $L1_ETH_RPC_HTTP
+      ETHEREUM_JSONRPC_TRACE_URL: $L1_ETH_RPC_HTTP
+      ETHEREUM_JSONRPC_WS_URL: $L1_ETH_RPC_WS
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/l1_blockscout?ssl=false
+      ECTO_USE_SSL: 'false'
+      POOL_SIZE: 10
+      POOL_SIZE_API: 10
+      ACCOUNT_POOL_SIZE: 10
+      SUPPORTED_CHAINS: '[]'
+      CHAIN_SPEC_PATH: /l1/validator/genesis.json
+      PORT: $L1_BLOCKSCOUT_PORT
+      SECRET_KEY_BASE: 'nfbREqcUrUW2IxWBHP6KbivqQiou/9id/Yca5eIqT0shcBiFltwbRkhq7pjzez14'
+      COIN_NAME: OAS
+      BLOCKSCOUT_PROTOCOL: http
+      BLOCKSCOUT_HOST: 127.0.0.1:$L1_BLOCKSCOUT_PORT
+      WEBAPP_URL: http://127.0.0.1:$L1_BLOCKSCOUT_PORT
+      API_URL: http://127.0.0.1:$L1_BLOCKSCOUT_PORT
+      CSV_DOC_LINK: 'https://docs.oasys.games/docs/staking/explore/1-2-csv-download'
+      RE_CAPTCHA_DISABLED: 'true'
+    volumes:
+      - ./l1:/l1:ro
+    ports:
+      - $L1_BLOCKSCOUT_PORT:$L1_BLOCKSCOUT_PORT/tcp
+    links:
+      - l1-rpc
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  # OP Stack Services
+  op-geth:
+    <<: *resident
+    build:
+      context: $OP_GETH_REPO
+    entrypoint: geth
+    command: >
+      --http
+      --http.corsdomain='*'
+      --http.vhosts='*'
+      --http.addr=0.0.0.0
+      --http.port=8545
+      --http.api=web3,debug,eth,txpool,net,engine
+      --ws
+      --ws.origins='*'
+      --ws.addr=0.0.0.0
+      --ws.port=8546
+      --ws.api=debug,eth,txpool,net,engine
+      --syncmode=full
+      --gcmode=archive
+      --nodiscover
+      --maxpeers=0
+      --networkid=$OP_CHAIN_ID
+      --authrpc.vhosts='*'
+      --authrpc.addr=0.0.0.0
+      --authrpc.port=8551
+      --authrpc.jwtsecret=/l2/jwt.txt
+      --txpool.pricelimit=0
+    volumes:
+      - ./l2:/l2:ro
+      - ./data/op-node:/op-node:ro
+      - ./data/op-geth:/root/.ethereum
+    ports:
+      - $OP_ETH_RPC_HTTP_PORT:8545/tcp
+      - $OP_ETH_RPC_WS_PORT:8546/tcp
+      - $OP_ENGINE_RPC_PORT:8551/tcp
+
+  op-builder:
+    <<: *oneshot
+    image: private-net/op-builder:latest
+    build:
+      context: $OP_MONO_REPO
+      dockerfile: ops/docker/op-stack-go/Dockerfile
+
+  op-node:
+    <<: *resident
+    build:
+      context: $OP_MONO_REPO
+      dockerfile: ./op-node/Dockerfile
+      args:
+        OP_STACK_GO_BUILDER: private-net/op-builder:latest
+    entrypoint: op-node
+    command: >
+      --l1=$L1_ETH_RPC_HTTP
+      --l1.rpckind=basic
+      --l2=$OP_ENGINE_RPC
+      --l2.jwt-secret=/l2/jwt.txt
+      --sequencer.enabled
+      --sequencer.l1-confs=3
+      --verifier.l1-confs=3
+      --rpc.enable-admin
+      --rpc.addr=0.0.0.0
+      --rpc.port=8547
+      --rollup.config=/data/rollup.json
+      --rpc.admin-state=/data/admin-state
+      --snapshotlog.file=/data/snapshotlog
+      --p2p.disable
+      --p2p.sequencer.key=$OP_SEQUENCER_KEY
+    volumes:
+      - ./l2:/l2:ro
+      - $OP_MONO_REPO:/op-monorepo:ro
+      - ./data/op-node:/data
+    links:
+      - l1-rpc
+      - op-geth
+
+  op-batcher:
+    <<: *resident
+    build:
+      context: $OP_MONO_REPO
+      dockerfile: ./op-batcher/Dockerfile
+      args:
+        OP_STACK_GO_BUILDER: private-net/op-builder:latest
+    entrypoint: op-batcher
+    command: >
+      --l1-eth-rpc=$L1_ETH_RPC_HTTP
+      --l2-eth-rpc=$OP_ETH_RPC_HTTP
+      --rollup-rpc=$OP_ROLLUP_RPC
+      --private-key=$OP_BATCHER_KEY
+      --poll-interval=1s
+      --sub-safety-margin=6
+      --num-confirmations=1
+      --safe-abort-nonce-too-low-count=3
+      --resubmission-timeout=30s
+      --rpc.addr=0.0.0.0
+      --rpc.port=8548
+      --rpc.enable-admin
+      --max-channel-duration=1
+    links:
+      - l1-rpc
+      - op-geth
+      - op-node
+
+  op-proposer:
+    <<: *resident
+    build:
+      context: $OP_MONO_REPO
+      dockerfile: ./op-proposer/Dockerfile
+      args:
+        OP_STACK_GO_BUILDER: private-net/op-builder:latest
+    entrypoint: op-proposer
+    command: >
+      --l1-eth-rpc=$L1_ETH_RPC_HTTP
+      --rollup-rpc=$OP_ROLLUP_RPC
+      --l2oo-address=$OP_L2OO_ADDR
+      --private-key=$OP_PROPOSER_KEY
+      --poll-interval=1s
+      --rpc.port=8560
+      --allow-non-finalized=true
+    links:
+      - l1-rpc
+      - op-node
+
+  op-blockscout:
+    <<: *resident
+    image: ghcr.io/oasysgames/oasys-blockscout:v5.2.1-beta1
+    environment:
+      NETWORK: ' '
+      SUBNETWORK: 'Private OP Stack'
+      ETHEREUM_JSONRPC_VARIANT: geth
+      ETHEREUM_JSONRPC_HTTP_URL: $OP_ETH_RPC_HTTP
+      ETHEREUM_JSONRPC_TRACE_URL: $OP_ETH_RPC_HTTP
+      ETHEREUM_JSONRPC_WS_URL: $OP_ETH_RPC_WS
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/l2_blockscout?ssl=false
+      ECTO_USE_SSL: 'false'
+      POOL_SIZE: 10
+      POOL_SIZE_API: 10
+      ACCOUNT_POOL_SIZE: 10
+      SUPPORTED_CHAINS: '[]'
+      CHAIN_SPEC_PATH: /op-node/genesis.json
+      PORT: $OP_BLOCKSCOUT_PORT
+      SECRET_KEY_BASE: 'U6434qTISQ7ozqRb1kzstkJzyfgWRIwFTefjNWT9laHMbFE9oat5U4Tshptux5yl'
+      COIN_NAME: OAS
+      BLOCKSCOUT_PROTOCOL: http
+      BLOCKSCOUT_HOST: 127.0.0.1:$OP_BLOCKSCOUT_PORT
+      WEBAPP_URL: http://127.0.0.1:$OP_BLOCKSCOUT_PORT
+      API_URL: http://127.0.0.1:$OP_BLOCKSCOUT_PORT
+      CSV_DOC_LINK: 'https://docs.oasys.games/docs/staking/explore/1-2-csv-download'
+      RE_CAPTCHA_DISABLED: 'true'
+    volumes:
+      - ./data/op-node:/op-node:ro
+    ports:
+      - $OP_BLOCKSCOUT_PORT:$OP_BLOCKSCOUT_PORT/tcp
+    links:
+      - op-geth
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  # Misc services
+  postgres:
+    <<: *resident
+    image: postgres:14
+    environment:
+      PGDATA: /data
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_MULTIPLE_DATABASES: l1_blockscout,l1_graph,l2_blockscout,l2_graph
+    volumes:
+      - ./misc/postgres/docker-postgresql-multiple-databases:/docker-entrypoint-initdb.d:ro
+      - ./data/postgres:/data
+    healthcheck:
+      test: psql -Upostgres -c 'SELECT 1'
+      interval: 10s
+      start_period: 10s
+
+  foundry:
+    <<: *oneshot
+    build: ./misc/foundry
+    environment:
+      # for /misc/foundry/deploy-config.sh
+      L1_RPC_URL: $L1_ETH_RPC_HTTP
+      L1_CHAIN_ID: $L1_CHAIN_ID
+      L1_BLOCK_TIME: $L1_BLOCK_TIME
+      OP_CHAIN_ID: $OP_CHAIN_ID
+      OP_BLOCK_TIME: $OP_BLOCK_TIME
+      GS_ADMIN_ADDRESS: $OP_ADMIN_ADDR
+      GS_ADMIN_PRIVATE_KEY: $OP_ADMIN_KEY
+      GS_SEQUENCER_ADDRESS: $OP_SEQUENCER_ADDR
+      GS_SEQUENCER_PRIVATE_KEY: $OP_SEQUENCER_KEY
+      GS_BATCHER_ADDRESS: $OP_BATCHER_ADDR
+      GS_BATCHER_PRIVATE_KEY: $OP_BATCHER_KEY
+      GS_PROPOSER_ADDRESS: $OP_PROPOSER_ADDR
+      GS_PROPOSER_PRIVATE_KEY: $OP_PROPOSER_KEY
+      GS_BATCH_INBOX_ADDRESS: $OP_BATCH_INBOX_ADDR
+      # for /misc/foundry/envrc.sh
+      ENVRC_L1_RPC_URL: http://127.0.0.1:$L1_ETH_RPC_HTTP_PORT
+    volumes:
+      - ./l2:/l2:ro
+      - ./misc:/misc:ro
+      - $OP_MONO_REPO:/op-monorepo

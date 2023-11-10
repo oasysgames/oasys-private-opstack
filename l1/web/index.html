@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono&display=swap" rel="stylesheet">
+
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/ethereum/web3.js@3.0.0/dist/web3.min.js"></script>
+
+  <script src="./config.js"></script>
+  <script src="./abis.js"></script>
+
+  <title>Private L1</title>
+</head>
+
+<body>
+  <div id="app"></div>
+
+  <script type="text/babel">
+    // initialize web3
+    const web3 = new Web3(new Web3.providers.HttpProvider(config.l1.rpc))
+    web3.eth.accounts.wallet.add(web3.eth.accounts.privateKeyToAccount(config.faucet.key))
+    config.validators.forEach(x => {
+      x.owner = web3.eth.accounts.privateKeyToAccount(x.ownerKey)
+      web3.eth.accounts.wallet.add(x.owner);
+    })
+
+    // contracts
+    const environment = new web3.eth.Contract(EnvironmentABI, config.contracts.environment)
+    const candidatemanager = new web3.eth.Contract(CandidateManagerABI, config.contracts.candidatemanager)
+    const stakemanager = (wallet) => {
+      const opts = {}
+      if (wallet) opts.from = wallet.address
+      return new web3.eth.Contract(StakeManagerABI, config.contracts.stakemanager, opts)
+    }
+
+    // utility functions
+    const tzDate = (timestamp) => {
+      let dt = new Date(timestamp)
+      return new Date(`${dt.toISOString().split('.')[0]}+0000`)
+    }
+
+    const addL1 = async () => {
+      const network = {
+        method: 'wallet_addEthereumChain',
+        params: [{
+          chainName: 'Oasys Private L1',
+          chainId: '0x' + config.l1.chainId.toString(16),
+          nativeCurrency: {
+            name: 'OAS',
+            symbol: 'OAS',
+            decimals: 18
+          },
+          rpcUrls: [config.l1.rpc],
+          blockExplorerUrls: [config.l1.explorer]
+        }]
+      }
+
+      window.ethereum.request(network)
+        .catch((error) => {
+          console.log(error)
+        })
+    }
+
+    const addOPStack = async () => {
+      const network = {
+        method: 'wallet_addEthereumChain',
+        params: [{
+          chainName: 'Oasys Private OP Stack',
+          chainId: '0x' + config.op.chainId.toString(16),
+          nativeCurrency: {
+            name: 'OAS',
+            symbol: 'OAS',
+            decimals: 18
+          },
+          rpcUrls: [config.op.rpc],
+          blockExplorerUrls: [config.op.explorer]
+        }]
+      }
+
+      window.ethereum.request(network)
+        .catch((error) => {
+          console.log(error)
+        })
+    }
+
+    const getValidatorByOperator = (operator) => {
+      return config.validators.filter(x => x.operator === operator)[0]
+    }
+
+    const useState = React.useState
+    const useEffect = React.useEffect
+
+    const ReactApp = () => {
+      const [block, setBlock] = useState(null)
+      const [epoch, setEpoch] = useState(null)
+      const [candidates, setCandidates] = useState(null)
+      const [validatorInfos, setValidatorInfos] = useState({})
+      const [receipt, setReceipt] = useState(null)
+
+      const joined = (validator) => {
+        const info = validatorInfos[validator.name] || {}
+        return info.operator === validator.operator ? 'yes' : 'no'
+      }
+
+      const stakes = (validator) => {
+        const info = validatorInfos[validator.name] || {}
+        return web3.utils.fromWei(info.stakes || '0') + ' OAS'
+      }
+
+      const sendTransaction = (method, opts) => {
+        const promise = method.send(opts)
+        setReceipt(promise)
+
+        promise
+          .then(receipt => {
+            console.log(receipt)
+            setReceipt(receipt)
+          })
+          .catch(err => {
+            console.error(err)
+            setReceipt(err.receipt || null)
+          })
+      }
+
+      const operations = {
+        join: async (validator) => {
+          const method = stakemanager(validator.owner)
+            .methods.joinValidator(validator.operator)
+          sendTransaction(method, { gas: 1000000 })
+        },
+        stake: async (validator) => {
+          const def = validator.verifier ? '30000000' : '10000000'
+
+          const input = window.prompt(`amount(unit: ether) / default is ${def} OAS`)
+          if (input === null) return
+          const amount = web3.utils.toWei(input || def)
+
+          const method = stakemanager(validator.owner)
+            .methods.stake(validator.owner.address, 0, amount)
+          sendTransaction(method, { gas: 1000000, value: amount })
+        },
+        unstake: async (validator) => {
+          const input = window.prompt(`amount(unit: ether) / default is 10000000 OAS`)
+          if (input === null) return
+          const amount = web3.utils.toWei(input || '10000000')
+
+          const method = stakemanager(validator.owner)
+            .methods.unstakeV2(validator.owner.address, 0, amount)
+          sendTransaction(method, { gas: 1000000 })
+        }
+      }
+
+      const getOAS = async () => {
+        const address = window.prompt('Wallet Address')
+        if (address === null) return
+
+        const amount = window.prompt(`Amount(unit: ether)`)
+        if (amount === null) return
+
+        const method = {
+          send: () => web3.eth.sendTransaction({
+            from: config.faucet.address,
+            to: address,
+            value: web3.utils.toWei(amount),
+            gas: 21000,
+          })
+        }
+        sendTransaction(method, {})
+      }
+
+      const sending = receipt instanceof Promise
+
+      useEffect(() => {
+        const fn1 = async () => {
+          setBlock(await web3.eth.getBlock('latest'))
+          setEpoch(await environment.methods.epoch().call())
+        }
+
+        // call the StakeManager.getValidatorInfo(owner,epoch) method
+        const fn2 = async () => {
+          const c = stakemanager()
+          const promises = config.validators.map(async (x) => {
+            const res = await c.methods.getValidatorInfo(x.owner.address, 0).call()
+            return { name: x.name, res }
+          })
+          const newstate = {};
+          (await Promise.all(promises)).forEach(x => { newstate[x.name] = x.res })
+          setValidatorInfos(newstate)
+        }
+
+        // call the CandidateValidatorManager.getHighStakes() method
+        const fn3 = async () => {
+          const epoch = await environment.methods.epoch().call()
+          setCandidates([
+            await candidatemanager.methods.getHighStakes(epoch, 0, 1000).call(),
+            await candidatemanager.methods.getHighStakes(epoch + 1, 0, 1000).call(),
+          ])
+        }
+
+        const timer = setInterval(async () => {
+          await fn1()
+          await fn2()
+          await fn3()
+        }, 1000);
+        return () => clearInterval(timer);
+      }, [])
+
+      return (
+        <div>
+          <button onClick={addL1}>Add Metamask(L1)</button>
+          <button onClick={addOPStack}>Add Metamask(OP Stack)</button>
+          <button onClick={getOAS}>Get L1 OAS</button>
+
+          <div class="spacer"></div>
+
+          <table>
+            <thead>
+              <tr>
+                <th>epoch</th>
+                <th>block</th>
+                <th>timestamp</th>
+                <th>miner</th>
+                <th>hash</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>{epoch}</td>
+                <td>{block && block.number}</td>
+                <td>{block && tzDate(block.timestamp * 1000).toLocaleString()}</td>
+                <td>{block && block.miner}</td>
+                <td>{block && block.hash}</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <div class="spacer"></div>
+
+          <h2>Validators</h2>
+          <table>
+            <thead>
+              <tr>
+                <th>name</th>
+                <th>owner</th>
+                <th>operator</th>
+                <th>joined</th>
+                <th>stakes</th>
+                <th>operations</th>
+              </tr>
+            </thead>
+            <tbody>
+              {config.validators.map(x => (<tr>
+                <td>{x.name}</td>
+                <td>{x.owner.address}</td>
+                <td>{x.operator}</td>
+                <td>{joined(x)}</td>
+                <td>{stakes(x)}</td>
+                <td>
+                  <button onClick={() => operations.join(x)} disabled={sending}>Join</button>
+                  <button onClick={() => operations.stake(x)} disabled={sending}>Stake</button>
+                  <button onClick={() => operations.unstake(x)} disabled={sending}>Unstake</button>
+                </td>
+              </tr>))}
+            </tbody>
+          </table>
+
+          <div class="spacer"></div>
+
+          {sending && <div>Sending transaction...</div>}
+
+          {(!sending && receipt) && <div>
+            Transaction success: <a href={`${config.l1.explorer}tx/${receipt.transactionHash}`} target="_blank">{receipt.transactionHash}</a>
+          </div>}
+
+          <div class="spacer"></div>
+
+          <h2>CandidateValidatorManager(Current Epoch)</h2>
+          {candidates && <table>
+            <thead>
+              <tr>
+                <th>name</th>
+                <th>owner</th>
+                <th>operator</th>
+                <th>stakes</th>
+                <th>active</th>
+                <th>jailed</th>
+                <th>candidate</th>
+              </tr>
+            </thead>
+            <tbody>
+              {candidates[0].owners.map((owner, i) => <tr>
+                <td>{getValidatorByOperator(candidates[0].operators[i]).name || 'unknown'}</td>
+                <td>{owner}</td>
+                <td>{candidates[0].operators[i]}</td>
+                <td>{web3.utils.fromWei(candidates[0].stakes[i])} OAS</td>
+                <td>{candidates[0].actives[i] ? 'yes' : 'no'}</td>
+                <td>{candidates[0].jailed[i] ? 'yes' : 'no'}</td>
+                <td>{candidates[0].candidates[i] ? 'yes' : 'no'}</td>
+              </tr>)}
+            </tbody>
+          </table>}
+
+          <div class="spacer"></div>
+
+          <h2>CandidateValidatorManager(Next Epoch)</h2>
+          {candidates && <table>
+            <thead>
+              <tr>
+                <th>name</th>
+                <th>owner</th>
+                <th>operator</th>
+                <th>stakes</th>
+                <th>active</th>
+                <th>jailed</th>
+                <th>candidate</th>
+              </tr>
+            </thead>
+            <tbody>
+              {candidates[1].owners.map((owner, i) => <tr>
+                <td>{getValidatorByOperator(candidates[1].operators[i]).name || 'unknown'}</td>
+                <td>{owner}</td>
+                <td>{candidates[1].operators[i]}</td>
+                <td>{web3.utils.fromWei(candidates[1].stakes[i])} OAS</td>
+                <td>{candidates[1].actives[i] ? 'yes' : 'no'}</td>
+                <td>{candidates[1].jailed[i] ? 'yes' : 'no'}</td>
+                <td>{candidates[1].candidates[i] ? 'yes' : 'no'}</td>
+              </tr>)}
+            </tbody>
+          </table>}
+        </div>
+      )
+    }
+
+    const container = document.getElementById('app')
+    const root = ReactDOM.createRoot(container)
+    root.render(<ReactApp />)
+  </script>
+
+  <style>
+    #app {
+      font-family: 'Roboto Mono', monospace;
+      font-size: .9rem;
+      padding: 1rem;
+    }
+
+    table {
+      width: auto;
+      border-collapse: collapse;
+      border-spacing: 0;
+    }
+
+    table th {
+      padding: 10px;
+      background: #e9faf9;
+      border: solid 1px #778ca3;
+    }
+
+    table td {
+      padding: 10px;
+      border: solid 1px #778ca3;
+    }
+
+    button+button {
+      margin-left: .5rem;
+    }
+
+    .spacer {
+      height: 1rem;
+    }
+  </style>
+</body>
+
+</html>
