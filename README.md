@@ -198,3 +198,23 @@ rm -rf data/l1-*/geth/nodes
 
 docker-compose up -d l1-rpc l1-validator1
 ```
+
+### How to reset L1 and OP Stack?
+
+Stop all services.
+```shell
+docker-compose down --remove-orphans --volumes
+```
+
+Delete container data.
+```shell
+rm -rf data
+```
+
+Delete data within op-monorepo.
+```shell
+rm -rf packages/contracts-bedrock/deploy-config/getting-started.json\
+       packages/contracts-bedrock/deployments/getting-started
+```
+
+Then repeat the steps after [Run L1 Services](#run-l1-services).
