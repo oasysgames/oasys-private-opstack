@@ -78,7 +78,7 @@ L1 block creation starts automatically, so execute `l1-validator1` staking withi
 
 Run the explorer ([http://127.0.0.1:4000/](http://127.0.0.1:4000/)).
 ```shell
-docker-compose up -d postgres && sleep 20 && docker-compose up -d l1-blockscout
+docker-compose up -d l1-blockscout
 ```
 
 ### Generate `getting-started.json` and `.envrc`
