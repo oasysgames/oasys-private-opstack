@@ -66,20 +66,18 @@ docker-compose pull
 
 ### Run L1 Services
 
-Run main services of L1.
+Run services of L1.
 ```shell
-docker-compose up -d l1-web l1-bootnode l1-rpc l1-validator1
+docker-compose up -d l1-web l1-bootnode l1-rpc l1-validator1 l1-blockscout
 ```
 
-L1 block creation starts automatically, so execute `l1-validator1` staking within the 1st epoch (40 blocks). Open the l1-web ([http://127.0.0.1:8080/](http://127.0.0.1:8080/)) and click `1. Join` and `2. Stake` button. 
 > l1-validator2 and l1-validator3 are optional.
+
+L1 block creation starts automatically, so execute `l1-validator1` staking within the 1st epoch (40 blocks). Open the l1-web ([http://127.0.0.1:8080/](http://127.0.0.1:8080/)) and click `1. Join` and `2. Stake` button. 
 
 ![Join & Stake](./.README/join-and-stake.jpg)
 
-Run the explorer ([http://127.0.0.1:4000/](http://127.0.0.1:4000/)).
-```shell
-docker-compose up -d l1-blockscout
-```
+Open the L1 explorer ([http://127.0.0.1:4000/](http://127.0.0.1:4000/)).
 
 ### Generate `getting-started.json` and `.envrc`
 
@@ -104,20 +102,37 @@ direnv allow
 cd packages/contracts-bedrock/ 
 ```
 
-#### Deploy L1 contracts
+#### Deploy and Verify L1 contracts
 
 ```shell
 forge script scripts/Deploy.s.sol:Deploy \
-  --private-key $GS_ADMIN_PRIVATE_KEY \
-  --rpc-url $L1_RPC_URL \
-  --broadcast
+  --private-key $GS_ADMIN_PRIVATE_KEY --rpc-url $L1_RPC_URL --broadcast \
+  --verify --verifier blockscout --verifier-url $L1_VERIFIER_URL
 
 # output on success
+> ...
 > Total Paid: 0.083734833 ETH (27911611 gas * avg 3 gwei)
 > 
 > Transactions saved to: /op-monorepo/packages/contracts-bedrock/broadcast/Deploy.s.sol/12345/run-latest.json
 > 
 > Sensitive values saved to: /op-monorepo/packages/contracts-bedrock/cache/Deploy.s.sol/12345/run-latest.json
+> 
+> 
+> ==========================
+> 
+> ONCHAIN EXECUTION COMPLETE & SUCCESSFUL.
+> Total Paid: 0.083734545 ETH (27911515 gas * avg 3 gwei)
+> ##
+> Start verification for (21) contracts
+> Start verifying contract `0xde761b24c43e2c9964ca2106f01933296491884d` deployed on 12345
+> 
+> Submitting verification for [src/legacy/AddressManager.sol:AddressManager] "0xDE761b24c43E2c9964CA2106f01933296491884D".
+> Submitted contract for verification:
+>         Response: `OK`
+>         GUID: `de761b24c43e2c9964ca2106f01933296491884d65531bd2`
+>         URL:
+>         http://127.0.0.1:4000/api?/address/0xde761b24c43e2c9964ca2106f01933296491884d
+> ...
 ```
 
 #### Generate contract artifacts
@@ -171,15 +186,12 @@ INFO [11-09|16:06:49.261] Successfully wrote genesis state         database=ligh
 
 ### Run OP Stack Services
 
-Run main services of OP Stack.
+Run services of OP Stack.
 ```shell
-docker-compose up -d op-geth op-node op-batcher op-proposer
+docker-compose up -d op-geth op-node op-batcher op-proposer op-blockscout
 ```
 
-Run the explorer ([http://127.0.0.1:4001/](http://127.0.0.1:4001/)). If op-geth and op-node are running correctly, blocks should be being created every 5 seconds.
-```shell
-docker-compose up -d op-blockscout
-```
+Open the OP Stack explorer ([http://127.0.0.1:4001/](http://127.0.0.1:4001/)). If op-geth and op-node are running correctly, blocks should be being created every 5 seconds.
 
 ## FAQs
 
