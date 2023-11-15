@@ -347,6 +347,7 @@ services:
       GS_BATCH_INBOX_ADDRESS: $OP_BATCH_INBOX_ADDR
       # for /misc/foundry/envrc.sh
       ENVRC_L1_RPC_URL: http://127.0.0.1:$L1_ETH_RPC_HTTP_PORT
+      ENVRC_L1_VERIFIER_URL: "http://127.0.0.1:$L1_BLOCKSCOUT_PORT/api\\?"
     volumes:
       - ./l2:/l2:ro
       - ./misc:/misc:ro

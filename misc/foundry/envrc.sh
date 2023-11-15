@@ -54,6 +54,7 @@ export L1_RPC_KIND=basic
 ##################################################
 #               Contract Deployment              #
 ##################################################
+export L1_VERIFIER_URL=$ENVRC_L1_VERIFIER_URL
 
 # RPC URL for the L1 network to interact with
 export L1_RPC_URL=$ENVRC_L1_RPC_URL
