@@ -267,6 +267,9 @@ services:
       --l2oo-address=$OP_L2OO_ADDR
       --private-key=$OP_PROPOSER_KEY
       --poll-interval=1s
+      --num-confirmations=1
+      --safe-abort-nonce-too-low-count=3
+      --resubmission-timeout=30s
       --rpc.port=8560
       --allow-non-finalized=true
     links:
@@ -330,11 +333,11 @@ services:
     <<: *oneshot
     build: ./misc/foundry
     environment:
+      L1_CHAIN_ID: $L1_CHAIN_ID
+      OP_CHAIN_ID: $OP_CHAIN_ID
       # for /misc/foundry/deploy-config.sh
       L1_RPC_URL: $L1_ETH_RPC_HTTP
-      L1_CHAIN_ID: $L1_CHAIN_ID
       L1_BLOCK_TIME: $L1_BLOCK_TIME
-      OP_CHAIN_ID: $OP_CHAIN_ID
       OP_BLOCK_TIME: $OP_BLOCK_TIME
       GS_ADMIN_ADDRESS: $OP_ADMIN_ADDR
       GS_ADMIN_PRIVATE_KEY: $OP_ADMIN_KEY
@@ -348,6 +351,9 @@ services:
       # for /misc/foundry/envrc.sh
       ENVRC_L1_RPC_URL: http://127.0.0.1:$L1_ETH_RPC_HTTP_PORT
       ENVRC_L1_VERIFIER_URL: "http://127.0.0.1:$L1_BLOCKSCOUT_PORT/api\\?"
+      # for /misc/foundry/sdk.sh
+      SDK_L1_RPC: http://127.0.0.1:$L1_ETH_RPC_HTTP_PORT
+      SDK_L2_RPC: http://127.0.0.1:$OP_ETH_RPC_HTTP_PORT
     volumes:
       - ./l2:/l2:ro
       - ./misc:/misc:ro

@@ -1,6 +1,6 @@
 # Private OP Stack
 
-## Setup
+## Setup L1 and OP Stack 
 
 ### Clone repositories
 
@@ -192,6 +192,16 @@ docker-compose up -d op-geth op-node op-batcher op-proposer op-blockscout
 ```
 
 Open the OP Stack explorer ([http://127.0.0.1:4001/](http://127.0.0.1:4001/)). If op-geth and op-node are running correctly, blocks should be being created every 5 seconds.
+
+## Setup OP Stack SDK
+
+To use the [OP Stack SDK](https://community.optimism.io/docs/sdk/) on a private chain, take a few [extra steps](https://stack.optimism.io/docs/build/sdk/#not-natively-supported-chains) is required.
+
+By using this script, you can skip those steps and use the SDK.
+```shell
+docker-compose run --rm -v /tmp:/work foundry 'bash /misc/foundry/sdk.sh > /work/sdk.js'
+```
+
 
 ## FAQs
 
