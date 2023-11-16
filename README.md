@@ -195,13 +195,33 @@ Open the OP Stack explorer ([http://127.0.0.1:4001/](http://127.0.0.1:4001/)). I
 
 ## Setup OP Stack SDK
 
-To use the [OP Stack SDK](https://community.optimism.io/docs/sdk/) on a private chain, take a few [extra steps](https://stack.optimism.io/docs/build/sdk/#not-natively-supported-chains) is required.
-
-By using this script, you can skip those steps and use the SDK.
+To use the [OP Stack SDK](https://community.optimism.io/docs/sdk/) on a private chain, take a few [extra steps](https://stack.optimism.io/docs/build/sdk/#not-natively-supported-chains) is required. By using this script, you can skip those steps and use the SDK.
 ```shell
 docker-compose run --rm -v /tmp:/work foundry 'bash /misc/foundry/sdk.sh > /work/sdk.js'
 ```
 
+Move the generated sdk.js and use it from JS/TS.
+```shell
+mv /tmp/sdk.js ~/your/project
+```
+
+Example of JavaScript.
+```javascript
+const opsdk = require("./sdk")
+
+const { l1Provider, l2Provider } = opsdk.getProviders()
+const { l1Signer, l2Signer } = opsdk.getSigners({ privateKey, l1Provider, l2Provider });
+const crossChainMessenger = opsdk.getCrossChainMessenger({ l1Signer, l2Signer });
+```
+
+Example of TypeScript.
+```typescript
+import * as opsdk from "./sdk.js";
+
+const { l1Provider, l2Provider } = opsdk.getProviders();
+const { l1Signer, l2Signer } = opsdk.getSigners({ privateKey, l1Provider, l2Provider });
+const crossChainMessenger = opsdk.getCrossChainMessenger({ l1Signer, l2Signer });
+```
 
 ## FAQs
 
