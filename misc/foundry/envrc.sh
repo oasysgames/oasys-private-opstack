@@ -10,7 +10,10 @@ reqenv() {
 }
 
 # Check required environment variables
-reqenv "ENVRC_L1_RPC_URL"
+reqenv "CLIENT_L1_RPC_URL"
+reqenv "ENVRC_L1_VERIFIER_URL"
+reqenv "CLIENT_L2_RPC_URL"
+reqenv "ENVRC_L2_VERIFIER_URL"
 reqenv "GS_ADMIN_ADDRESS"
 reqenv "GS_ADMIN_PRIVATE_KEY"
 reqenv "GS_BATCHER_ADDRESS"
@@ -55,9 +58,11 @@ export L1_RPC_KIND=basic
 #               Contract Deployment              #
 ##################################################
 export L1_VERIFIER_URL=$ENVRC_L1_VERIFIER_URL
+export L2_VERIFIER_URL=$ENVRC_L2_VERIFIER_URL
 
 # RPC URL for the L1 network to interact with
-export L1_RPC_URL=$ENVRC_L1_RPC_URL
+export L1_RPC_URL=$CLIENT_L1_RPC_URL
+export L2_RPC_URL=$CLIENT_L2_RPC_URL
 
 # Salt used via CREATE2 to determine implementation addresses
 # NOTE: If you want to deploy contracts from scratch you MUST reload this
