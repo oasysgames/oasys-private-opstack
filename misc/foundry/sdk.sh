@@ -9,22 +9,25 @@ reqenv() {
 
 setenv () {
   VAR=$1
-  export $VAR=$(jq -r .address  /op-monorepo/packages/contracts-bedrock/deployments/getting-started/$2.json)
+  export $VAR=$(jq -rM .address  /op-monorepo/packages/contracts-bedrock/deployments/getting-started/$2.json)
 }
 
 setenv SDK_OP_ADDRESS_MANAGER_ADDRESS AddressManager
 setenv SDK_OP_L1_MESSENGER_ADDRESS L1CrossDomainMessengerProxy
-setenv SDK_OP_L1_BRIDGE_ADDRESS L1StandardBridgeProxy
+setenv SDK_OP_L1_STANDARD_BRIDGE_ADDRESS L1StandardBridgeProxy
+setenv SDK_OP_L1_ERC721_BRIDGE_ADDRESS L1ERC721BridgeProxy
 setenv SDK_OP_PORTAL_ADDRESS OptimismPortalProxy
 setenv SDK_OP_L2OO_ADDRESS L2OutputOracleProxy
 
 reqenv "L1_CHAIN_ID"
 reqenv "OP_CHAIN_ID"
-reqenv "SDK_L1_RPC"
-reqenv "SDK_L2_RPC"
+reqenv "CLIENT_L1_RPC_URL"
+reqenv "CLIENT_L2_RPC_URL"
+reqenv "SDK_L1_EXPLORER"
+reqenv "SDK_OP_EXPLORER"
 reqenv "SDK_OP_ADDRESS_MANAGER_ADDRESS"
 reqenv "SDK_OP_L1_MESSENGER_ADDRESS"
-reqenv "SDK_OP_L1_BRIDGE_ADDRESS"
+reqenv "SDK_OP_L1_STANDARD_BRIDGE_ADDRESS"
 reqenv "SDK_OP_PORTAL_ADDRESS"
 reqenv "SDK_OP_L2OO_ADDRESS"
 
@@ -32,8 +35,11 @@ jscode=$(cat << EOL
 const ethers = require("ethers");
 const optimismSDK = require("@eth-optimism/sdk");
 
-const l1RPC = "$SDK_L1_RPC";
-const l2RPC = "$SDK_L2_RPC";
+const l1RPC = "$CLIENT_L1_RPC_URL";
+const l2RPC = "$CLIENT_L2_RPC_URL";
+
+const l1Explorer = "$SDK_L1_EXPLORER";
+const l2Explorer = "$SDK_OP_EXPLORER";
 
 const l1Contracts = {
   StateCommitmentChain: "0x0000000000000000000000000000000000000000",
@@ -41,7 +47,8 @@ const l1Contracts = {
   BondManager: "0x0000000000000000000000000000000000000000",
   AddressManager: "$SDK_OP_ADDRESS_MANAGER_ADDRESS",
   L1CrossDomainMessenger: "$SDK_OP_L1_MESSENGER_ADDRESS",
-  L1StandardBridge: "$SDK_OP_L1_BRIDGE_ADDRESS",
+  L1StandardBridge: "$SDK_OP_L1_STANDARD_BRIDGE_ADDRESS",
+  L1ERC721BridgeProxy: "$SDK_OP_L1_ERC721_BRIDGE_ADDRESS",
   OptimismPortal: "$SDK_OP_PORTAL_ADDRESS",
   L2OutputOracle: "$SDK_OP_L2OO_ADDRESS",
 };
@@ -82,23 +89,33 @@ const getSigners = (args) => {
  * @param {optimismSDK.SignerOrProviderLike} args.l1Signer
  * @param {optimismSDK.SignerOrProviderLike} args.l2Signer
  * @param {optimismSDK.OEL1ContractsLike} [args.l1Contracts]
+ * @param {Object} [args.bridgeAdapter]
+ * @param {new (opts: {
+ *   messenger: optimismSDK.CrossChainMessenger;
+ *   l1Bridge: optimismSDK.AddressLike;
+ *   l2Bridge: optimismSDK.AddressLike
+* }) => optimismSDK.IBridgeAdapter} args.bridgeAdapter.adapter
+ * @param {string} args.bridgeAdapter.l1Bridge
+ * @param {string} args.bridgeAdapter.l2Bridge
  */
 const getCrossChainMessenger = (args) => {
+  let bridgeAdapter = {
+    Adapter: optimismSDK.StandardBridgeAdapter,
+    l1Bridge: l1Contracts.L1StandardBridge,
+    l2Bridge: "0x4200000000000000000000000000000000000010",
+  }
+  if (args.bridgeAdapter) {
+    bridgeAdapter = {
+      Adapter: args.bridgeAdapter.adapter,
+      l1Bridge: args.bridgeAdapter.l1Bridge,
+      l2Bridge: args.bridgeAdapter.l2Bridge,
+    }
+  }
+
   return new optimismSDK.CrossChainMessenger({
     bedrock: true,
     contracts: { l1: args.l1Contracts || l1Contracts },
-    bridges: {
-      Standard: {
-        l1Bridge: l1Contracts.L1StandardBridge,
-        l2Bridge: "0x4200000000000000000000000000000000000010",
-        Adapter: optimismSDK.StandardBridgeAdapter,
-      },
-      ETH: {
-        l1Bridge: l1Contracts.L1StandardBridge,
-        l2Bridge: "0x4200000000000000000000000000000000000010",
-        Adapter: optimismSDK.ETHBridgeAdapter,
-      },
-    },
+    bridges: { Standard: bridgeAdapter },
     l1ChainId: $L1_CHAIN_ID,
     l2ChainId: $OP_CHAIN_ID,
     l1SignerOrProvider: args.l1Signer,
@@ -106,7 +123,16 @@ const getCrossChainMessenger = (args) => {
   });
 };
 
-module.exports = { getProviders, getSigners, getCrossChainMessenger };
+module.exports = {
+  l1RPC,
+  l2RPC,
+  l1Explorer,
+  l2Explorer,
+  l1Contracts,
+  getProviders,
+  getSigners,
+  getCrossChainMessenger,
+};
 EOL
 )
 

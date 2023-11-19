@@ -200,14 +200,9 @@ To use the [OP Stack SDK](https://community.optimism.io/docs/sdk/) on a private 
 docker-compose run --rm -v /tmp:/work foundry 'bash /misc/foundry/sdk.sh > /work/sdk.js'
 ```
 
-Move the generated sdk.js and use it from JS/TS.
-```shell
-mv /tmp/sdk.js ~/your/project
-```
-
 Example of JavaScript.
 ```javascript
-const opsdk = require("./sdk")
+const opsdk = require("/tmp/sdk")
 
 const { l1Provider, l2Provider } = opsdk.getProviders()
 const { l1Signer, l2Signer } = opsdk.getSigners({ privateKey, l1Provider, l2Provider });
@@ -216,7 +211,7 @@ const crossChainMessenger = opsdk.getCrossChainMessenger({ l1Signer, l2Signer })
 
 Example of TypeScript.
 ```typescript
-import * as opsdk from "./sdk.js";
+import * as opsdk from "/tmp/sdk";
 
 const { l1Provider, l2Provider } = opsdk.getProviders();
 const { l1Signer, l2Signer } = opsdk.getSigners({ privateKey, l1Provider, l2Provider });
