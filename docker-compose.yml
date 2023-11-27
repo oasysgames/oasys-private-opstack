@@ -17,28 +17,15 @@ x-oneshot: &oneshot
 x-l1-geth: &l1-geth
   image: golang:1.17-stretch
   entrypoint: /bin/sh /l1/validator/entrypoint.sh
-  links:
-    - l1-bootnode
 
 x-l1-geth-env: &l1-geth-env
   NETWORK_ID: $L1_CHAIN_ID
   KEYSTORE: /l1/validator/keystore
   GENESIS: /l1/validator/genesis.json
-  BOOTNODES: enode://e521ad93c7aa24a33a2e57a6be9c1e63ed39bd5a76245c5f8c004e7dac650adf70bee6354a7a9a83322cbb2f9458f6004259b6080ed4c5c3d689d4eef2e6a5a5@l1-bootnode:30301
+  BOOTNODES: enode://e521ad93c7aa24a33a2e57a6be9c1e63ed39bd5a76245c5f8c004e7dac650adf70bee6354a7a9a83322cbb2f9458f6004259b6080ed4c5c3d689d4eef2e6a5a5@l1-rpc:30303
 
 services:
   # L1 Services
-  l1-builder:
-    <<: *oneshot
-    image: golang:1.17-stretch
-    entrypoint: make
-    working_dir: /app
-    volumes:
-      - $L1_GETH_REPO:/app
-      # dependency cache
-      - ./data/l1-builder/go-build:/root/.cache/go-build
-      - ./data/l1-builder/go:/go
-
   ## Staking Dashboard
   l1-web:
     <<: *resident
@@ -57,21 +44,13 @@ services:
     ports:
       - $L1_WEB_PORT:80/tcp
 
-  ## Bootstrap node
-  l1-bootnode:
-    <<: *resident
-    image: golang:1.17-stretch
-    entrypoint: /usr/local/bin/bootnode
-    command: -nodekeyhex d0abe73e1fcef53dbbb5a9289cec5a15b58781b3503f284a2154e115f2f2d38f
-    volumes:
-      - $L1_GETH_REPO/build/bin:/usr/local/bin:ro
-
   ## RPC
   l1-rpc:
     <<: [*resident, *l1-geth]
     environment:
       <<: *l1-geth-env
       OPTS: '--rpc.allow-unprotected-txs'
+      NODEKEY: d0abe73e1fcef53dbbb5a9289cec5a15b58781b3503f284a2154e115f2f2d38f
     volumes:
       - ./l1:/l1:ro
       - $L1_GETH_REPO/build/bin:/usr/local/bin:ro
@@ -153,8 +132,7 @@ services:
   # OP Stack Services
   op-geth:
     <<: *resident
-    build:
-      context: $OP_GETH_REPO
+    image: golang:1.21-bookworm
     entrypoint: geth
     command: >
       --http
@@ -180,6 +158,7 @@ services:
       --txpool.pricelimit=0
     volumes:
       - ./l2:/l2:ro
+      - $OP_GETH_REPO/build/bin:/usr/local/bin:ro
       - ./data/op-node:/op-node:ro
       - ./data/op-geth:/root/.ethereum
     ports:
@@ -187,20 +166,9 @@ services:
       - $OP_ETH_RPC_WS_PORT:8546/tcp
       - $OP_ENGINE_RPC_PORT:8551/tcp
 
-  op-builder:
-    <<: *oneshot
-    image: private-net/op-builder:latest
-    build:
-      context: $OP_MONO_REPO
-      dockerfile: ops/docker/op-stack-go/Dockerfile
-
   op-node:
     <<: *resident
-    build:
-      context: $OP_MONO_REPO
-      dockerfile: ./op-node/Dockerfile
-      args:
-        OP_STACK_GO_BUILDER: private-net/op-builder:latest
+    image: golang:1.21-bookworm
     entrypoint: op-node
     command: >
       --l1=$L1_ETH_RPC_HTTP
@@ -217,10 +185,11 @@ services:
       --rpc.admin-state=/data/admin-state
       --snapshotlog.file=/data/snapshotlog
       --p2p.disable
-      --p2p.sequencer.key=$OP_SEQUENCER_KEY
+      --p2p.sequencer.key=$OP_SEQUENCER_KEY_NO_PREFIX
     volumes:
       - ./l2:/l2:ro
       - $OP_MONO_REPO:/op-monorepo:ro
+      - $OP_MONO_REPO/op-node/bin:/usr/local/bin:ro
       - ./data/op-node:/data
     links:
       - l1-rpc
@@ -228,11 +197,7 @@ services:
 
   op-batcher:
     <<: *resident
-    build:
-      context: $OP_MONO_REPO
-      dockerfile: ./op-batcher/Dockerfile
-      args:
-        OP_STACK_GO_BUILDER: private-net/op-builder:latest
+    image: golang:1.21-bookworm
     entrypoint: op-batcher
     command: >
       --l1-eth-rpc=$L1_ETH_RPC_HTTP
@@ -248,6 +213,8 @@ services:
       --rpc.port=8548
       --rpc.enable-admin
       --max-channel-duration=1
+    volumes:
+      - $OP_MONO_REPO/op-batcher/bin:/usr/local/bin:ro
     links:
       - l1-rpc
       - op-geth
@@ -255,11 +222,7 @@ services:
 
   op-proposer:
     <<: *resident
-    build:
-      context: $OP_MONO_REPO
-      dockerfile: ./op-proposer/Dockerfile
-      args:
-        OP_STACK_GO_BUILDER: private-net/op-builder:latest
+    image: golang:1.21-bookworm
     entrypoint: op-proposer
     command: >
       --l1-eth-rpc=$L1_ETH_RPC_HTTP
@@ -272,6 +235,8 @@ services:
       --resubmission-timeout=30s
       --rpc.port=8560
       --allow-non-finalized=true
+    volumes:
+      - $OP_MONO_REPO/op-proposer/bin:/usr/local/bin:ro
     links:
       - l1-rpc
       - op-node
