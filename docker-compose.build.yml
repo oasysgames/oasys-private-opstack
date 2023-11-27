@@ -1,0 +1,52 @@
+version: '3'
+
+services:
+  l1-geth:
+    image: golang:1.17-stretch
+    entrypoint: make geth
+    working_dir: /app
+    volumes:
+      - $L1_GETH_REPO:/app
+      # dependency cache
+      - ./tmp/build-cache/l1-geth/go:/go
+      - ./tmp/build-cache/l1-geth/go-build:/root/.cache/go-build
+
+  op-geth:
+    image: golang:1.21-bookworm
+    entrypoint: make geth
+    working_dir: /app
+    volumes:
+      - $OP_GETH_REPO:/app
+      # dependency cache
+      - ./tmp/build-cache/op-geth/go:/go
+      - ./tmp/build-cache/op-geth/go-build:/root/.cache/go-build
+
+  op-node:
+    image: golang:1.21-bookworm
+    entrypoint: make op-node
+    working_dir: /app
+    volumes:
+      - $OP_MONO_REPO:/app
+      # dependency cache
+      - ./tmp/build-cache/op-monorepo/go:/go
+      - ./tmp/build-cache/op-monorepo/go-build:/root/.cache/go-build
+
+  op-batcher:
+    image: golang:1.21-bookworm
+    entrypoint: make op-batcher
+    working_dir: /app
+    volumes:
+      - $OP_MONO_REPO:/app
+      # dependency cache
+      - ./tmp/build-cache/op-monorepo/go:/go
+      - ./tmp/build-cache/op-monorepo/go-build:/root/.cache/go-build
+
+  op-proposer:
+    image: golang:1.21-bookworm
+    entrypoint: make op-proposer
+    working_dir: /app
+    volumes:
+      - $OP_MONO_REPO:/app
+      # dependency cache
+      - ./tmp/build-cache/op-monorepo/go:/go
+      - ./tmp/build-cache/op-monorepo/go-build:/root/.cache/go-build

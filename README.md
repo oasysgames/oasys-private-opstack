@@ -49,14 +49,26 @@ OP_MONO_REPO=<op-monorepo>
 OP_GETH_REPO=<op-geth>
 ```
 
-### Build OP Stack images
+### Build components
+
+Build the L1 geth and OP Stack components.
 
 ```shell
-# first, build the base image
-docker-compose build op-builder
+docker-compose -f ./docker-compose.build.yml up
 
-docker-compose build
+# build a specific component (fast)
+docker-compose -f ./docker-compose.build.yml up {l1-geth,op-geth,op-node,op-batcher,op-proposer}
 ```
+
+The built binaries are created within each repository.
+
+| Layer | Component | Repo/Path |
+| --- | --- | --- |
+| L1 | geth | oasys-validator/build/bin/geth |
+| OP Stack | geth | op-geth/build/bin/geth |
+| OP Stack | op-node | op-monorepo/op-node/bin/op-node |
+| OP Stack | op-batcher | op-monorepo/op-batcher/bin/op-batcher |
+| OP Stack | op-proposer | op-monorepo/op-proposer/bin/op-proposer |
 
 ### Pull other images
 
@@ -68,7 +80,7 @@ docker-compose pull
 
 Run services of L1.
 ```shell
-docker-compose up -d l1-web l1-bootnode l1-rpc l1-validator1 l1-blockscout
+docker-compose up -d l1-web l1-rpc l1-validator1 l1-blockscout
 ```
 
 > l1-validator2 and l1-validator3 are optional.

@@ -5,6 +5,11 @@ if [ ! -d "/root/.ethereum/geth" ]; then
   geth init $GENESIS
 fi
 
+# write the node key for p2p
+if [ -n "$NODEKEY" ]; then
+  echo -n "$NODEKEY" > /root/.ethereum/geth/nodekey
+fi
+
 # sync only mode if the `ETHERBASE` is not set
 if [ -n "$ETHERBASE" ]; then
   OPTS="$OPTS --mine --miner.etherbase $ETHERBASE --miner.gaslimit 30000000"
