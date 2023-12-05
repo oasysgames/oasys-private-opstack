@@ -8,28 +8,30 @@ reqenv() {
 }
 
 setenv () {
-  VAR=$1
-  export $VAR=$(jq -rM .address  /op-monorepo/packages/contracts-bedrock/deployments/getting-started/$2.json)
+  KEY=$1
+  VAR=$2
+  export $VAR=$(jq -rM $KEY /op-monorepo/packages/contracts-bedrock/tmp/oasys/L1/build/Build.s.sol/latest/addresses.json)
 }
 
-setenv SDK_OP_ADDRESS_MANAGER_ADDRESS AddressManager
-setenv SDK_OP_L1_MESSENGER_ADDRESS L1CrossDomainMessengerProxy
-setenv SDK_OP_L1_STANDARD_BRIDGE_ADDRESS L1StandardBridgeProxy
-setenv SDK_OP_L1_ERC721_BRIDGE_ADDRESS L1ERC721BridgeProxy
-setenv SDK_OP_PORTAL_ADDRESS OptimismPortalProxy
-setenv SDK_OP_L2OO_ADDRESS L2OutputOracleProxy
+setenv .L1CrossDomainMessengerProxy OP_L1_CROSS_DOMAIN_MESSENGER_ADDR
+setenv .L1StandardBridgeProxy OP_L1_STANDARD_BRIDGE_ADDR
+setenv .L1ERC721BridgeProxy OP_L1_ERC721_BRIDGE_ADDR
+setenv .OptimismPortalProxy OP_OPTIMISM_PORTAL_ADDR
+setenv .L2OutputOracleProxy OP_L2OO_ADDR
+setenv .AddressManager OP_ADDRESS_MANAGER_ADDR
 
-reqenv "L1_CHAIN_ID"
-reqenv "OP_CHAIN_ID"
-reqenv "CLIENT_L1_RPC_URL"
-reqenv "CLIENT_L2_RPC_URL"
-reqenv "SDK_L1_EXPLORER"
-reqenv "SDK_OP_EXPLORER"
-reqenv "SDK_OP_ADDRESS_MANAGER_ADDRESS"
-reqenv "SDK_OP_L1_MESSENGER_ADDRESS"
-reqenv "SDK_OP_L1_STANDARD_BRIDGE_ADDRESS"
-reqenv "SDK_OP_PORTAL_ADDRESS"
-reqenv "SDK_OP_L2OO_ADDRESS"
+reqenv L1_CHAIN_ID
+reqenv OP_CHAIN_ID
+reqenv CLIENT_L1_RPC_URL
+reqenv CLIENT_L2_RPC_URL
+reqenv SDK_L1_EXPLORER
+reqenv SDK_OP_EXPLORER
+reqenv OP_L1_CROSS_DOMAIN_MESSENGER_ADDR
+reqenv OP_L1_STANDARD_BRIDGE_ADDR
+reqenv OP_L1_ERC721_BRIDGE_ADDR
+reqenv OP_OPTIMISM_PORTAL_ADDR
+reqenv OP_L2OO_ADDR
+reqenv OP_ADDRESS_MANAGER_ADDR
 
 jscode=$(cat << EOL
 const ethers = require("ethers");
@@ -45,12 +47,12 @@ const l1Contracts = {
   StateCommitmentChain: "0x0000000000000000000000000000000000000000",
   CanonicalTransactionChain: "0x0000000000000000000000000000000000000000",
   BondManager: "0x0000000000000000000000000000000000000000",
-  AddressManager: "$SDK_OP_ADDRESS_MANAGER_ADDRESS",
-  L1CrossDomainMessenger: "$SDK_OP_L1_MESSENGER_ADDRESS",
-  L1StandardBridge: "$SDK_OP_L1_STANDARD_BRIDGE_ADDRESS",
-  L1ERC721BridgeProxy: "$SDK_OP_L1_ERC721_BRIDGE_ADDRESS",
-  OptimismPortal: "$SDK_OP_PORTAL_ADDRESS",
-  L2OutputOracle: "$SDK_OP_L2OO_ADDRESS",
+  AddressManager: "$OP_ADDRESS_MANAGER_ADDR",
+  L1CrossDomainMessenger: "$OP_L1_CROSS_DOMAIN_MESSENGER_ADDR",
+  L1StandardBridge: "$OP_L1_STANDARD_BRIDGE_ADDR",
+  L1ERC721BridgeProxy: "$OP_L1_ERC721_BRIDGE_ADDR",
+  OptimismPortal: "$OP_OPTIMISM_PORTAL_ADDR",
+  L2OutputOracle: "$OP_L2OO_ADDR",
 };
 
 /**

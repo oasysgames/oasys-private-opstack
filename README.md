@@ -11,7 +11,7 @@ Clone repositories to any location you prefer.
 
 git clone --recursive https://github.com/oasysgames/oasys-validator.git 
 
-git clone https://github.com/ethereum-optimism/optimism.git op-monorepo
+git clone https://github.com/oasysgames/oasys-opstack.git
 
 git clone https://github.com/ethereum-optimism/op-geth.git
 ```
@@ -19,20 +19,12 @@ git clone https://github.com/ethereum-optimism/op-geth.git
 The `oasys-validator` repository checks out a release tag for a testnet that allows for free contract deployment.
 
 ```shell
-cd oasys-validator
+cd oasys-validator/
 
 # check the latest release tag
 git tag | grep testnet
 
 git checkout xxx-testnet
-```
-
-Installation of dependencies is required in the `op-monorepo` repository.  
-See the official document. See also the [official document](https://stack.optimism.io/docs/build/getting-started/#build-the-optimism-monorepo).
-```shell
-cd op-monorepo
-
-pnpm install && pnpm build
 ```
 
 ### Create `.env` file
@@ -45,7 +37,7 @@ cp .env.sample .env
 Add the absolute path of the repository cloned earlier.
 ```dotenv
 L1_GETH_REPO=<oasys-validator>
-OP_MONO_REPO=<op-monorepo>
+OP_MONO_REPO=<oasys-opstack>
 OP_GETH_REPO=<op-geth>
 ```
 
@@ -70,12 +62,6 @@ The built binaries are created within each repository.
 | OP Stack | op-batcher | op-monorepo/op-batcher/bin/op-batcher |
 | OP Stack | op-proposer | op-monorepo/op-proposer/bin/op-proposer |
 
-### Pull other images
-
-```shell
-docker-compose pull
-```
-
 ### Run L1 Services
 
 Run services of L1.
@@ -91,19 +77,15 @@ L1 block creation starts automatically, so execute `l1-validator1` staking withi
 
 Open the L1 explorer ([http://127.0.0.1:4000/](http://127.0.0.1:4000/)).
 
-### Generate `getting-started.json` and `.envrc`
+### Generate `.envrc`
 
-Generate a `getting-started.json` and `.envrc` file within the op-monorepo repository. These files will be used for the subsequent contract deployment and genesis.json generation.
+Generate a `.envrc` file within the op-monorepo repository.
 
 ```shell
-# getting-started.json
-docker-compose run --rm foundry 'bash /misc/foundry/deploy-config.sh > /op-monorepo/packages/contracts-bedrock/deploy-config/getting-started.json'
-
-# .envrc
 docker-compose run --rm foundry 'bash /misc/foundry/envrc.sh > /op-monorepo/.envrc'
 ```
 
-### Deploy OP Stack contracts to L1
+### Deploy OPStack contracts to L1 using the factory contract
 
 ```shell
 cd op-monorepo/
@@ -111,63 +93,34 @@ cd op-monorepo/
 # load .envrc
 direnv allow
 
-cd packages/contracts-bedrock/ 
+# Installation of dependencies.
+pnpm install && pnpm build
+
+# Salt(uint256) to be passed to create2 opcode.
+export SALT=$(date +%s)
+
+# Wallet to run PermissionedContractFactory.
+# This is a HardHat develop account. (address: 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266)
+export HH_ACCOUNT_0=0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
+
+# Deploy OPStack factory contract to L1 via PermissionedContractFactory.
+cd packages/contracts-bedrock/
+
+forge script --rpc-url $L1_RPC_URL --private-key $HH_ACCOUNT_0 --broadcast \
+  scripts/oasys/L1/build/Deploy.s.sol:Deploy
+
+# Deploy OPStack contracts to L1 using the factory.
+# Note: You can use any private key.
+forge script --rpc-url $L1_RPC_URL --private-key $HH_ACCOUNT_0 --broadcast \
+  scripts/oasys/L1/build/Build.s.sol:Build
+
+# Get the address of the `L2OutputOracleProxy` contract.
+jq -r .L2OutputOracleProxy tmp/oasys/L1/build/Build.s.sol/latest/addresses.json
 ```
 
-#### Deploy and Verify L1 contracts
+Finally, set the address of the L2OutputOracleProxy as `OP_L2OO_ADDR` in the `.env` file.
 
-```shell
-forge script scripts/Deploy.s.sol:Deploy \
-  --private-key $GS_ADMIN_PRIVATE_KEY --rpc-url $L1_RPC_URL --broadcast \
-  --verify --verifier blockscout --verifier-url $L1_VERIFIER_URL
-
-# output on success
-> ...
-> Total Paid: 0.083734833 ETH (27911611 gas * avg 3 gwei)
-> 
-> Transactions saved to: /op-monorepo/packages/contracts-bedrock/broadcast/Deploy.s.sol/12345/run-latest.json
-> 
-> Sensitive values saved to: /op-monorepo/packages/contracts-bedrock/cache/Deploy.s.sol/12345/run-latest.json
-> 
-> 
-> ==========================
-> 
-> ONCHAIN EXECUTION COMPLETE & SUCCESSFUL.
-> Total Paid: 0.083734545 ETH (27911515 gas * avg 3 gwei)
-> ##
-> Start verification for (21) contracts
-> Start verifying contract `0xde761b24c43e2c9964ca2106f01933296491884d` deployed on 12345
-> 
-> Submitting verification for [src/legacy/AddressManager.sol:AddressManager] "0xDE761b24c43E2c9964CA2106f01933296491884D".
-> Submitted contract for verification:
->         Response: `OK`
->         GUID: `de761b24c43e2c9964ca2106f01933296491884d65531bd2`
->         URL:
->         http://127.0.0.1:4000/api?/address/0xde761b24c43e2c9964ca2106f01933296491884d
-> ...
-```
-
-#### Generate contract artifacts
-
-```shell
-forge script scripts/Deploy.s.sol:Deploy --sig 'sync()' --rpc-url $L1_RPC_URL
-
-# output on success
->  Syncing deployment SystemConfigProxy: contract Proxy
->  Deploy Tx not found for SystemOwnerSafe skipping deployment artifact generation
->  Synced temp deploy files, deleting /op-monorepo/packages/contracts-bedrock/deployments/getting-started/.deploy
-```
-
-#### Set L2OutputOracleProxy address to `.env`
-
-Get the address of the `L2OutputOracleProxy` contract.
-```shell
-jq -r .address deployments/getting-started/L2OutputOracleProxy.json
-```
-
-And set it as the `OP_L2OO_ADDR` in the `.env` file.
 ```dotenv
-## address of the `L2OutputOracle` contract on L1
 OP_L2OO_ADDR=<here>
 ```
 
@@ -177,8 +130,8 @@ Generate a `genesis.json` and `rollup.json` for the OP Stack.
 
 ```shell
 docker-compose run --rm --no-deps op-node genesis l2 \
-  --deploy-config /op-monorepo/packages/contracts-bedrock/deploy-config/getting-started.json \
-  --deployment-dir /op-monorepo/packages/contracts-bedrock/deployments/getting-started/ \
+  --deploy-config /op-monorepo/packages/contracts-bedrock/tmp/oasys/L1/build/Build.s.sol/latest/deploy-config.json \
+  --l1-deployments /op-monorepo/packages/contracts-bedrock/tmp/oasys/L1/build/Build.s.sol/latest/addresses.json \
   --outfile.l2 /data/genesis.json \
   --outfile.rollup /data/rollup.json \
   --l1-rpc http://l1-rpc:8545/
