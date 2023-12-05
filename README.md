@@ -11,7 +11,7 @@ Clone repositories to any location you prefer.
 
 git clone --recursive https://github.com/oasysgames/oasys-validator.git 
 
-git clone https://github.com/ethereum-optimism/optimism.git op-monorepo
+git clone https://github.com/oasysgames/oasys-opstack.git
 
 git clone https://github.com/ethereum-optimism/op-geth.git
 ```
@@ -37,7 +37,7 @@ cp .env.sample .env
 Add the absolute path of the repository cloned earlier.
 ```dotenv
 L1_GETH_REPO=<oasys-validator>
-OP_MONO_REPO=<op-monorepo>
+OP_MONO_REPO=<oasys-opstack>
 OP_GETH_REPO=<op-geth>
 ```
 
