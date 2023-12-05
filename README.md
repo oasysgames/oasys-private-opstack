@@ -158,6 +158,21 @@ docker-compose up -d op-geth op-node op-batcher op-proposer op-blockscout
 
 Open the OP Stack explorer ([http://127.0.0.1:4001/](http://127.0.0.1:4001/)). If op-geth and op-node are running correctly, blocks should be being created every 5 seconds.
 
+### Run OP Stack Replica Services
+
+Generate the genesis block of the replica op-geth.
+```shell
+docker-compose run --rm op-geth-replica init /op-node/genesis.json
+```
+
+Run replica services.
+```shell
+docker-compose up -d op-geth-replica op-node-replica op-blockscout-replica
+```
+
+Open the replica explorer ([http://127.0.0.1:4002/](http://127.0.0.1:4002/)). L2 block is synchronized with about a 1-minute delay. Synchronization can be sped up by reducing the `--verifier.l1-confs` in the op-node-replica service.
+
+
 ## Setup OP Stack SDK
 
 To use the [OP Stack SDK](https://community.optimism.io/docs/sdk/) on a private chain, take a few [extra steps](https://stack.optimism.io/docs/build/sdk/#not-natively-supported-chains) is required. By using this script, you can skip those steps and use the SDK.
@@ -182,6 +197,7 @@ const { l1Provider, l2Provider } = opsdk.getProviders();
 const { l1Signer, l2Signer } = opsdk.getSigners({ privateKey, l1Provider, l2Provider });
 const crossChainMessenger = opsdk.getCrossChainMessenger({ l1Signer, l2Signer });
 ```
+
 
 ## FAQs
 

@@ -191,6 +191,8 @@ services:
       - $OP_MONO_REPO:/op-monorepo:ro
       - $OP_MONO_REPO/op-node/bin:/usr/local/bin:ro
       - ./data/op-node:/data
+    ports:
+      - $OP_ROLLUP_RPC_PORT:8547/tcp
     links:
       - l1-rpc
       - op-geth
@@ -277,6 +279,109 @@ services:
       postgres:
         condition: service_healthy
 
+  # OP Stack Replica Services
+  op-geth-replica:
+    <<: *resident
+    image: golang:1.21-bookworm
+    entrypoint: geth
+    command: >
+      --http
+      --http.corsdomain='*'
+      --http.vhosts='*'
+      --http.addr=0.0.0.0
+      --http.port=8545
+      --http.api=web3,debug,eth,txpool,net,engine
+      --ws
+      --ws.origins='*'
+      --ws.addr=0.0.0.0
+      --ws.port=8546
+      --ws.api=debug,eth,txpool,net,engine
+      --syncmode=full
+      --gcmode=archive
+      --nodiscover
+      --maxpeers=0
+      --networkid=$OP_CHAIN_ID
+      --authrpc.vhosts='*'
+      --authrpc.addr=0.0.0.0
+      --authrpc.port=8551
+      --authrpc.jwtsecret=/l2/jwt.txt
+      --txpool.pricelimit=0
+    volumes:
+      - ./l2:/l2:ro
+      - $OP_GETH_REPO/build/bin:/usr/local/bin:ro
+      - ./data/op-node:/op-node:ro
+      - ./data/op-geth-replica:/root/.ethereum
+    ports:
+      - $OP_ETH_RPC_HTTP_REPLICA_PORT:8545/tcp
+      - $OP_ETH_RPC_WS_REPLICA_PORT:8546/tcp
+      - $OP_ENGINE_RPC_REPLICA_PORT:8551/tcp
+
+  op-node-replica:
+    <<: *resident
+    image: golang:1.21-bookworm
+    entrypoint: op-node
+    command: >
+      --l1=$L1_ETH_RPC_HTTP
+      --l1.rpckind=basic
+      --l2=ws://op-geth-replica:8551
+      --l2.jwt-secret=/l2/jwt.txt
+      --verifier.l1-confs=3
+      --rpc.enable-admin
+      --rpc.addr=0.0.0.0
+      --rpc.port=8547
+      --rollup.config=/op-node/rollup.json
+      --rpc.admin-state=/data/admin-state
+      --snapshotlog.file=/data/snapshotlog
+      --p2p.disable
+      --p2p.sequencer.key=$OP_SEQUENCER_KEY_NO_PREFIX
+    volumes:
+      - ./l2:/l2:ro
+      - $OP_MONO_REPO:/op-monorepo:ro
+      - $OP_MONO_REPO/op-node/bin:/usr/local/bin:ro
+      - ./data/op-node:/op-node:ro
+      - ./data/op-node-replica:/data
+    ports:
+      - $OP_ROLLUP_RPC_REPLICA_PORT:8547/tcp
+    links:
+      - l1-rpc
+      - op-geth-replica
+
+  op-blockscout-replica:
+    <<: *resident
+    image: ghcr.io/oasysgames/oasys-blockscout:v5.2.1-beta1
+    environment:
+      NETWORK: ' '
+      SUBNETWORK: 'Private OP Stack Replica'
+      ETHEREUM_JSONRPC_VARIANT: geth
+      ETHEREUM_JSONRPC_HTTP_URL: http://op-geth-replica:8545
+      ETHEREUM_JSONRPC_TRACE_URL: http://op-geth-replica:8545
+      ETHEREUM_JSONRPC_WS_URL: ws://op-geth-replica:8546
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/l2_blockscout_replica?ssl=false
+      ECTO_USE_SSL: 'false'
+      POOL_SIZE: 10
+      POOL_SIZE_API: 10
+      ACCOUNT_POOL_SIZE: 10
+      SUPPORTED_CHAINS: '[]'
+      CHAIN_SPEC_PATH: /op-node/genesis.json
+      PORT: $OP_BLOCKSCOUT_REPLICA_PORT
+      SECRET_KEY_BASE: 'U6434qTISQ7ozqRb1kzstkJzyfgWRIwFTefjNWT9laHMbFE9oat5U4Tshptux5yl'
+      COIN_NAME: OAS
+      BLOCKSCOUT_PROTOCOL: http
+      BLOCKSCOUT_HOST: 127.0.0.1:$OP_BLOCKSCOUT_REPLICA_PORT
+      WEBAPP_URL: http://127.0.0.1:$OP_BLOCKSCOUT_REPLICA_PORT
+      API_URL: http://127.0.0.1:$OP_BLOCKSCOUT_REPLICA_PORT
+      CSV_DOC_LINK: 'https://docs.oasys.games/docs/staking/explore/1-2-csv-download'
+      RE_CAPTCHA_DISABLED: 'true'
+    volumes:
+      - ./data/op-node:/op-node:ro
+    ports:
+      - $OP_BLOCKSCOUT_REPLICA_PORT:$OP_BLOCKSCOUT_REPLICA_PORT/tcp
+    links:
+      - op-geth-replica
+    depends_on:
+      postgres:
+        condition: service_healthy
+
   # Misc services
   postgres:
     <<: *resident
@@ -285,7 +390,7 @@ services:
       PGDATA: /data
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
-      POSTGRES_MULTIPLE_DATABASES: l1_blockscout,l1_graph,l2_blockscout,l2_graph
+      POSTGRES_MULTIPLE_DATABASES: l1_blockscout,l1_graph,l2_blockscout,l2_graph,l2_blockscout_replica
     volumes:
       - ./misc/postgres/docker-postgresql-multiple-databases:/docker-entrypoint-initdb.d:ro
       - ./data/postgres:/data
