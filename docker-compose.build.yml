@@ -1,5 +1,7 @@
 version: '3'
 
+name: private-opstack-builder
+
 services:
   l1-geth:
     image: golang:1.17-stretch
