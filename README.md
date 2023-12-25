@@ -13,7 +13,7 @@ git clone --recursive https://github.com/oasysgames/oasys-validator.git
 
 git clone https://github.com/oasysgames/oasys-opstack.git
 
-git clone https://github.com/ethereum-optimism/op-geth.git
+git clone https://github.com/oasysgames/oasys-op-geth.git
 ```
 
 The `oasys-validator` repository checks out a release tag for a testnet that allows for free contract deployment.
@@ -38,7 +38,7 @@ Add the absolute path of the repository cloned earlier.
 ```dotenv
 L1_GETH_REPO=<oasys-validator>
 OP_MONO_REPO=<oasys-opstack>
-OP_GETH_REPO=<op-geth>
+OP_GETH_REPO=<oasys-op-geth>
 ```
 
 ### Build components
@@ -57,7 +57,7 @@ The built binaries are created within each repository.
 | Layer | Component | Repo/Path |
 | --- | --- | --- |
 | L1 | geth | oasys-validator/build/bin/geth |
-| OP Stack | geth | op-geth/build/bin/geth |
+| OP Stack | geth | oasys-op-geth/build/bin/geth |
 | OP Stack | op-node | op-monorepo/op-node/bin/op-node |
 | OP Stack | op-batcher | op-monorepo/op-batcher/bin/op-batcher |
 | OP Stack | op-proposer | op-monorepo/op-proposer/bin/op-proposer |
