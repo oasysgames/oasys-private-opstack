@@ -236,3 +236,18 @@ rm -rf packages/contracts-bedrock/deploy-config/getting-started.json\
 ```
 
 Then repeat the steps after [Run L1 Services](#run-l1-services).
+
+### How to create forked chains?
+```sh
+# Stop L1 containers
+docker-compose stop l1-rpc l1-validator1 l1-validator2 l1-validator3
+
+# Delete P2P caches
+rm -rf ./data/l1-*/geth/nodes
+
+# Modify the entrypoint scripts as follows:
+# Remove (or comment out) `--bootnodes $BOOTNODES` in ./l1/validator/entrypoint.sh
+
+# Start containers
+docker-compose start
+```
