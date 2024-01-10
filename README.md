@@ -239,13 +239,14 @@ Then repeat the steps after [Run L1 Services](#run-l1-services).
 
 ### How to create forked chains?
 ```sh
-# Stop L1 containers
+# Stop L1 containers, need to stop all to prevent reconnecting each other again
 docker-compose stop l1-rpc l1-validator1 l1-validator2 l1-validator3
 
 # Delete P2P caches
 rm -rf ./data/l1-*/geth/nodes
 
-# Modify the entrypoint scripts as follows:
+# Modify the entrypoint scripts as follows
+# Only apply to the miner chain's. Doesn't change the major chain
 # Remove (or comment out) `--bootnodes $BOOTNODES` in ./l1/validator/entrypoint.sh
 
 # Start containers
