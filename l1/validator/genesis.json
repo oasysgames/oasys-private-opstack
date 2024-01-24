@@ -78,6 +78,21 @@
       "__key__": "0x3da6e34cbe2db96e74ab22269cfa22fde7badd670550d759917d606866beb485",
       "balance": "0x204fce5e3e25026110000000"
     },
+    "0xA889698683900857FA9AC54FBC972e88292b5387": {
+      "__name__": "L1 / Operator of validator1",
+      "__key__": "0x07734279b061f4a0990d02c4f474612806067ab91c0636934ab845a97643a12a",
+      "balance": "0x0"
+    },
+    "0xB07F340E051cc0db4d9d4fD115B148993994DddD": {
+      "__name__": "L1 / Operator of validator2",
+      "__key__": "0x94c03c46a9b01585492c1dcff1ecb1d3c43d429f72f2e0a3f3445b497608b338",
+      "balance": "0x0"
+    },
+    "0x9a8490E0faE649cA0ED0b221E4FadCa9a44Cd93e": {
+      "__name__": "L1 / Operator of validator3",
+      "__key__": "0xffb13b03c4f008927db566cad45c6b403831898fdec8bf30f6b3c6850ee02ea2",
+      "balance": "0x0"
+    },
     "0x3BE28eCA07BD17813F94c00Fba43c5ee886d0808": {
       "__name__": "L2 / Optimism / Sequencer",
       "__key__": "0x0b80bdf12cd85fd0b5f719fa14da19c0b430b8bf74ed092865e254c2b2d5ce20",
