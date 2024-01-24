@@ -61,7 +61,6 @@ export L2_GAS_LIMIT=$OP_GAS_LIMIT
 export FINALIZATION_PERIOD_SECONDS=12
 export ENABLE_L2_ZERO_FEE=true
 
-
 ##################################################
 #              op-node Configuration             #
 ##################################################
