@@ -58,6 +58,7 @@ export L2_CHAIN_ID=$OP_CHAIN_ID
 export L1_BLOCK_TIME=$L1_BLOCK_TIME
 export L2_BLOCK_TIME=$OP_BLOCK_TIME
 export FINALIZATION_PERIOD_SECONDS=12
+export L2_GAS_LIMIT=$OP_GAS_LIMIT
 
 ##################################################
 #              op-node Configuration             #
