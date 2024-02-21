@@ -22,8 +22,8 @@ setenv .AddressManager OP_ADDRESS_MANAGER_ADDR
 
 reqenv L1_CHAIN_ID
 reqenv OP_CHAIN_ID
-reqenv CLIENT_L1_RPC_URL
-reqenv CLIENT_L2_RPC_URL
+reqenv L1_ETH_RPC_HTTP_PORT
+reqenv OP_ETH_RPC_HTTP_PORT
 reqenv OP_MONO_REPO
 reqenv L1_BLOCKSCOUT_PORT
 reqenv OP_BLOCKSCOUT_PORT
@@ -38,8 +38,8 @@ jscode=$(cat << EOL
 const ethers = require("ethers");
 const optimismSDK = require("$OP_MONO_REPO/packages/sdk");
 
-const l1RPC = "$CLIENT_L1_RPC_URL";
-const l2RPC = "$CLIENT_L2_RPC_URL";
+const l1RPC = "http://127.0.0.1:$L1_ETH_RPC_HTTP_PORT";
+const l2RPC = "http://127.0.0.1:$OP_ETH_RPC_HTTP_PORT";
 
 const l1Explorer = "http://127.0.0.1:$L1_BLOCKSCOUT_PORT";
 const l2Explorer = "http://127.0.0.1:$OP_BLOCKSCOUT_PORT";
