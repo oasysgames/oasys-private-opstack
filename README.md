@@ -116,6 +116,10 @@ forge script --rpc-url $L1_RPC_URL --private-key $HH_ACCOUNT_0 --broadcast \
 forge script --rpc-url $L1_RPC_URL --private-key $HH_ACCOUNT_0 --broadcast \
   scripts/oasys/L1/build/Build.s.sol:Build
 
+# Set the message relayer address to the OasysPortal.
+forge script --rpc-url $L1_RPC_URL --sender $OP_ADMIN_ADDR --private-key $OP_ADMIN_KEY --broadcast \
+  scripts/oasys/L1/build/Build.s.sol:SetMessageRelayer
+
 # Get the address of the `L2OutputOracleProxy` contract.
 jq -r .L2OutputOracleProxy tmp/oasys/L1/build/Build.s.sol/latest/addresses.json
 ```
