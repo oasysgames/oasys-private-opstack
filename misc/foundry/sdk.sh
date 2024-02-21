@@ -24,8 +24,9 @@ reqenv L1_CHAIN_ID
 reqenv OP_CHAIN_ID
 reqenv CLIENT_L1_RPC_URL
 reqenv CLIENT_L2_RPC_URL
-reqenv SDK_L1_EXPLORER
-reqenv SDK_OP_EXPLORER
+reqenv OP_MONO_REPO
+reqenv L1_BLOCKSCOUT_PORT
+reqenv OP_BLOCKSCOUT_PORT
 reqenv OP_L1_CROSS_DOMAIN_MESSENGER_ADDR
 reqenv OP_L1_STANDARD_BRIDGE_ADDR
 reqenv OP_L1_ERC721_BRIDGE_ADDR
@@ -35,13 +36,13 @@ reqenv OP_ADDRESS_MANAGER_ADDR
 
 jscode=$(cat << EOL
 const ethers = require("ethers");
-const optimismSDK = require("@eth-optimism/sdk");
+const optimismSDK = require("$OP_MONO_REPO/packages/sdk");
 
 const l1RPC = "$CLIENT_L1_RPC_URL";
 const l2RPC = "$CLIENT_L2_RPC_URL";
 
-const l1Explorer = "$SDK_L1_EXPLORER";
-const l2Explorer = "$SDK_OP_EXPLORER";
+const l1Explorer = "http://127.0.0.1:$L1_BLOCKSCOUT_PORT";
+const l2Explorer = "http://127.0.0.1:$OP_BLOCKSCOUT_PORT";
 
 const l1Contracts = {
   StateCommitmentChain: "0x0000000000000000000000000000000000000000",

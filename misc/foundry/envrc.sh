@@ -10,10 +10,10 @@ reqenv() {
 }
 
 # Check required environment variables
-reqenv "CLIENT_L1_RPC_URL"
-reqenv "ENVRC_L1_VERIFIER_URL"
-reqenv "CLIENT_L2_RPC_URL"
-reqenv "ENVRC_L2_VERIFIER_URL"
+reqenv "L1_ETH_RPC_HTTP_PORT"
+reqenv "L1_BLOCKSCOUT_PORT"
+reqenv "OP_ETH_RPC_HTTP_PORT"
+reqenv "OP_BLOCKSCOUT_PORT"
 reqenv "L1_BLOCK_TIME"
 reqenv "OP_CHAIN_ID"
 reqenv "OP_BLOCK_TIME"
@@ -25,6 +25,8 @@ reqenv "OP_PROPOSER_ADDR"
 reqenv "OP_PROPOSER_KEY"
 reqenv "OP_SEQUENCER_ADDR"
 reqenv "OP_SEQUENCER_KEY"
+reqenv "OP_RELAYER_ADDR"
+reqenv "OP_RELAYER_KEY"
 
 # Generate the .envrc
 envrc=$(cat << EOL
@@ -48,18 +50,28 @@ export OP_PROPOSER_KEY=$OP_PROPOSER_KEY
 export OP_SEQUENCER_ADDR=$OP_SEQUENCER_ADDR
 export OP_SEQUENCER_KEY=$OP_SEQUENCER_KEY
 
+# Relayer account
+export OP_RELAYER_ADDR=$OP_RELAYER_ADDR
+export OP_RELAYER_KEY=$OP_RELAYER_KEY
+
 # For the "packages/contracts-bedrock/scripts/oasys/L1/build/Build.s.sol"
 export FINAL_SYSTEM_OWNER=$OP_ADMIN_ADDR
 export P2P_SEQUENCER=$OP_SEQUENCER_ADDR
 export L2OO_CHALLENGER=$OP_ADMIN_ADDR
 export L2OO_PROPOSER=$OP_PROPOSER_ADDR
 export BATCH_SENDER=$OP_BATCHER_ADDR
+export MESSAGE_RELAYER=$OP_RELAYER_ADDR
 export L2_CHAIN_ID=$OP_CHAIN_ID
 export L1_BLOCK_TIME=$L1_BLOCK_TIME
 export L2_BLOCK_TIME=$OP_BLOCK_TIME
 export L2_GAS_LIMIT=$OP_GAS_LIMIT
-export FINALIZATION_PERIOD_SECONDS=12
+export FINALIZATION_PERIOD_SECONDS=604800
+export OUTPUT_ORACLE_STARTING_BLOCK_NUMBER=0
+export OUTPUT_ORACLE_STARTING_TIMESTAMP="$(date +%s)"
 export ENABLE_L2_ZERO_FEE=true
+export ENABLE_GOVERNANCE=false
+export GOVERNANCE_TOKEN_NAME=
+export GOVERNANCE_TOKEN_SYMBOL=
 
 ##################################################
 #              op-node Configuration             #
@@ -73,12 +85,12 @@ export L1_RPC_KIND=basic
 ##################################################
 #               Contract Deployment              #
 ##################################################
-export L1_VERIFIER_URL=$ENVRC_L1_VERIFIER_URL
-export L2_VERIFIER_URL=$ENVRC_L2_VERIFIER_URL
+export L1_VERIFIER_URL="http://127.0.0.1:$L1_BLOCKSCOUT_PORT/api?"
+export L2_VERIFIER_URL="http://127.0.0.1:$OP_BLOCKSCOUT_PORT/api?"
 
 # RPC URL for the L1 network to interact with
-export L1_RPC_URL=$CLIENT_L1_RPC_URL
-export L2_RPC_URL=$CLIENT_L2_RPC_URL
+export L1_RPC_URL=http://127.0.0.1:$L1_ETH_RPC_HTTP_PORT
+export L2_RPC_URL=http://127.0.0.1:$OP_ETH_RPC_HTTP_PORT
 
 # Salt used via CREATE2 to determine implementation addresses
 # NOTE: If you want to deploy contracts from scratch you MUST reload this
