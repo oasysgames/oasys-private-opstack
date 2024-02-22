@@ -402,7 +402,27 @@ services:
   foundry:
     <<: *oneshot
     build: ./misc/foundry
-    env_file: .env
+    environment:
+      L1_CHAIN_ID: $L1_CHAIN_ID
+      OP_CHAIN_ID: $OP_CHAIN_ID
+      CLIENT_L1_RPC_URL: http://127.0.0.1:$L1_ETH_RPC_HTTP_PORT
+      CLIENT_L2_RPC_URL: http://127.0.0.1:$OP_ETH_RPC_HTTP_PORT
+      # for /misc/foundry/envrc.sh
+      L1_BLOCK_TIME: $L1_BLOCK_TIME
+      OP_BLOCK_TIME: $OP_BLOCK_TIME
+      OP_ADMIN_ADDR: $OP_ADMIN_ADDR
+      OP_ADMIN_KEY: $OP_ADMIN_KEY
+      OP_SEQUENCER_ADDR: $OP_SEQUENCER_ADDR
+      OP_SEQUENCER_KEY: $OP_SEQUENCER_KEY
+      OP_BATCHER_ADDR: $OP_BATCHER_ADDR
+      OP_BATCHER_KEY: $OP_BATCHER_KEY
+      OP_PROPOSER_ADDR: $OP_PROPOSER_ADDR
+      OP_PROPOSER_KEY: $OP_PROPOSER_KEY
+      ENVRC_L1_VERIFIER_URL: "http://127.0.0.1:$L1_BLOCKSCOUT_PORT/api\\?"
+      ENVRC_L2_VERIFIER_URL: "http://127.0.0.1:$OP_BLOCKSCOUT_PORT/api\\?"
+      # for /misc/foundry/sdk.sh
+      SDK_L1_EXPLORER: http://127.0.0.1:$L1_BLOCKSCOUT_PORT
+      SDK_OP_EXPLORER: http://127.0.0.1:$OP_BLOCKSCOUT_PORT
     volumes:
       - ./l2:/l2:ro
       - ./misc:/misc:ro
