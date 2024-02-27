@@ -411,7 +411,7 @@ services:
   # Message relayer
   message-relayer:
     restart: always
-    env_file: $MESSAGE_LAYER/.env.docker
+    env_file: $MESSAGE_LAYER/.env
     build: 
       context: $MESSAGE_LAYER
       dockerfile: Dockerfile
