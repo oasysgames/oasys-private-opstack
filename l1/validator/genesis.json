@@ -212,6 +212,10 @@
     "0x8626f6940E2eb28930eFb4CeF49B2d1F2C9C1199": {
       "__name__": "Hardhat Account #19",
       "balance": "0x204fce5e3e25026110000000"
+    },
+    "0x5ab345eFDb9A2A1f9753f73fDaA684dc9133D214": {
+      "__name__": "Hardhat Account #19",
+      "balance": "0x204fce5e3e25026110000000"
     }
   }
 }

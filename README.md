@@ -16,6 +16,8 @@ git clone --recursive https://github.com/oasysgames/oasys-validator.git
 git clone https://github.com/oasysgames/oasys-opstack.git
 
 git clone https://github.com/oasysgames/oasys-op-geth.git
+
+git clone https://github.com/oasysgames/opstack-message-relayer
 ```
 
 The `oasys-validator` repository checks out a release tag for a testnet that allows for free contract deployment.
@@ -41,6 +43,7 @@ Add the absolute path of the repository cloned earlier.
 L1_GETH_REPO=<oasys-validator>
 OP_MONO_REPO=<oasys-opstack>
 OP_GETH_REPO=<oasys-op-geth>
+MESSAGE_LAYER=<opstack-message-layer>
 ```
 
 ### Build components
@@ -178,6 +181,45 @@ docker-compose up -d op-geth-replica op-node-replica op-blockscout-replica
 
 Open the replica explorer ([http://127.0.0.1:4002/](http://127.0.0.1:4002/)). L2 block is synchronized with about a 1-minute delay. Synchronization can be sped up by reducing the `--verifier.l1-confs` in the op-node-replica service.
 
+## Setup Message Relayer
+
+1. Go to message_relayer folder
+```shell
+cd message_relayer
+```
+2. Set up env 
+
+```shell
+cp .env.example .env
+
+# Edit the .env file to set your environment variables:
+vi .env
+```
+To get MESSAGE_RELAYER__L1_WALLET, MESSAGE_RELAYER__FINALIZER_PRIVATE_KEY go to env from private-opstack
+
+To get MESSAGE_RELAYER__ADDRESS_MANAGER, MESSAGE_RELAYER__L1_CROSS_DOMAIN_MESSENGER,
+MESSAGE_RELAYER__PORTAL_ADDRESS,
+MESSAGE_RELAYER__OUTPUT_ORACLE
+
+```sh
+jq -r .AddressManager tmp/oasys/L1/build/Build.s.sol/latest/addresses.json
+jq -r .L1CrossDomainMessengerProxy tmp/oasys/L1/build/Build.s.sol/latest/addresses.json
+jq -r .OptimismPortalProxy tmp/oasys/L1/build/Build.s.sol/latest/addresses.json
+jq -r .L2OutputOracleProxy tmp/oasys/L1/build/Build.s.sol/latest/addresses.json
+```
+
+
+3. Deploy Multisig
+```shell
+pnpm run deploy
+```
+
+After deploy you will get `MESSAGE_RELAYER__MULTICALL_ADDRESS`, you need to fill in .env
+
+Back to current repo and run docker
+```shell
+docker-compose up -d message-relayer --build
+```
 
 ## Setup OP Stack SDK
 

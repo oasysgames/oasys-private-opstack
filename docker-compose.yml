@@ -407,3 +407,16 @@ services:
       - ./l2:/l2:ro
       - ./misc:/misc:ro
       - $OP_MONO_REPO:/op-monorepo
+
+  # Message relayer
+  message-relayer:
+    restart: always
+    env_file: $MESSAGE_LAYER/.env.docker
+    build: 
+      context: $MESSAGE_LAYER
+      dockerfile: Dockerfile
+    expose:
+      - 7300
+    depends_on:
+      - l1-rpc
+      - op-geth
