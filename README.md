@@ -195,7 +195,7 @@ cp .env.example .env
 # Edit the .env file to set your environment variables:
 vi .env
 ```
-To get MESSAGE_RELAYER__L1_WALLET, MESSAGE_RELAYER__FINALIZER_PRIVATE_KEY go to env from private-opstack
+To get MESSAGE_RELAYER__PROVER_PRIVATE_KEY, MESSAGE_RELAYER__FINALIZER_PRIVATE_KEY go to env from private-opstack
 
 To get MESSAGE_RELAYER__ADDRESS_MANAGER, MESSAGE_RELAYER__L1_CROSS_DOMAIN_MESSENGER,
 MESSAGE_RELAYER__PORTAL_ADDRESS,
