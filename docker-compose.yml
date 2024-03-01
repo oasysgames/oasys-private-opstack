@@ -1,4 +1,4 @@
-version: '3'
+version: "3"
 
 # templates
 x-resident: &resident
@@ -9,8 +9,7 @@ x-resident: &resident
       max-size: 128m
       max-file: 1
 
-x-oneshot: &oneshot
-  # prevent startup with `docker-compose up -d`
+x-oneshot: &oneshot # prevent startup with `docker-compose up -d`
   profiles:
     - oneshot
 
@@ -32,11 +31,11 @@ services:
     image: nginx:1.25
     environment:
       L1_CHAIN_ID: $L1_CHAIN_ID
-      L1_RPC: 'http://127.0.0.1:$L1_ETH_RPC_HTTP_PORT/'
-      L1_EXPLORER: 'http://127.0.0.1:$L1_BLOCKSCOUT_PORT/'
+      L1_RPC: "http://127.0.0.1:$L1_ETH_RPC_HTTP_PORT/"
+      L1_EXPLORER: "http://127.0.0.1:$L1_BLOCKSCOUT_PORT/"
       OP_CHAIN_ID: $OP_CHAIN_ID
-      OP_RPC: 'http://127.0.0.1:$OP_ETH_RPC_HTTP_PORT/'
-      OP_EXPLORER: 'http://127.0.0.1:$OP_BLOCKSCOUT_PORT/'
+      OP_RPC: "http://127.0.0.1:$OP_ETH_RPC_HTTP_PORT/"
+      OP_EXPLORER: "http://127.0.0.1:$OP_BLOCKSCOUT_PORT/"
     volumes:
       - ./l1/web/index.html:/usr/share/nginx/html/index.html:ro
       - ./l1/web/abis.js:/usr/share/nginx/html/abis.js:ro
@@ -49,7 +48,7 @@ services:
     <<: [*resident, *l1-geth]
     environment:
       <<: *l1-geth-env
-      OPTS: '--rpc.allow-unprotected-txs'
+      OPTS: "--rpc.allow-unprotected-txs"
       NODEKEY: d0abe73e1fcef53dbbb5a9289cec5a15b58781b3503f284a2154e115f2f2d38f
     volumes:
       - ./l1:/l1:ro
@@ -64,7 +63,7 @@ services:
     <<: [*resident, *l1-geth]
     environment:
       <<: *l1-geth-env
-      ETHERBASE: '0xA889698683900857FA9AC54FBC972e88292b5387'
+      ETHERBASE: "0xA889698683900857FA9AC54FBC972e88292b5387"
     volumes:
       - ./l1:/l1:ro
       - $L1_GETH_REPO/build/bin:/usr/local/bin:ro
@@ -75,7 +74,7 @@ services:
     <<: [*resident, *oneshot, *l1-geth]
     environment:
       <<: *l1-geth-env
-      ETHERBASE: '0xB07F340E051cc0db4d9d4fD115B148993994DddD'
+      ETHERBASE: "0xB07F340E051cc0db4d9d4fD115B148993994DddD"
     volumes:
       - ./l1:/l1:ro
       - $L1_GETH_REPO/build/bin:/usr/local/bin:ro
@@ -86,7 +85,7 @@ services:
     <<: [*resident, *oneshot, *l1-geth]
     environment:
       <<: *l1-geth-env
-      ETHERBASE: '0x9a8490E0faE649cA0ED0b221E4FadCa9a44Cd93e'
+      ETHERBASE: "0x9a8490E0faE649cA0ED0b221E4FadCa9a44Cd93e"
     volumes:
       - ./l1:/l1:ro
       - $L1_GETH_REPO/build/bin:/usr/local/bin:ro
@@ -97,28 +96,28 @@ services:
     <<: *resident
     image: ghcr.io/oasysgames/oasys-blockscout:v5.2.1-beta1
     environment:
-      NETWORK: ' '
-      SUBNETWORK: 'Private Hub-Layer'
+      NETWORK: " "
+      SUBNETWORK: "Private Hub-Layer"
       ETHEREUM_JSONRPC_VARIANT: geth
       ETHEREUM_JSONRPC_HTTP_URL: $L1_ETH_RPC_HTTP
       ETHEREUM_JSONRPC_TRACE_URL: $L1_ETH_RPC_HTTP
       ETHEREUM_JSONRPC_WS_URL: $L1_ETH_RPC_WS
       DATABASE_URL: postgresql://postgres:postgres@postgres:5432/l1_blockscout?ssl=false
-      ECTO_USE_SSL: 'false'
+      ECTO_USE_SSL: "false"
       POOL_SIZE: 10
       POOL_SIZE_API: 10
       ACCOUNT_POOL_SIZE: 10
-      SUPPORTED_CHAINS: '[]'
+      SUPPORTED_CHAINS: "[]"
       CHAIN_SPEC_PATH: /l1/validator/genesis.json
       PORT: $L1_BLOCKSCOUT_PORT
-      SECRET_KEY_BASE: 'nfbREqcUrUW2IxWBHP6KbivqQiou/9id/Yca5eIqT0shcBiFltwbRkhq7pjzez14'
+      SECRET_KEY_BASE: "nfbREqcUrUW2IxWBHP6KbivqQiou/9id/Yca5eIqT0shcBiFltwbRkhq7pjzez14"
       COIN_NAME: OAS
       BLOCKSCOUT_PROTOCOL: http
       BLOCKSCOUT_HOST: 127.0.0.1:$L1_BLOCKSCOUT_PORT
       WEBAPP_URL: http://127.0.0.1:$L1_BLOCKSCOUT_PORT
       API_URL: http://127.0.0.1:$L1_BLOCKSCOUT_PORT
-      CSV_DOC_LINK: 'https://docs.oasys.games/docs/staking/explore/1-2-csv-download'
-      RE_CAPTCHA_DISABLED: 'true'
+      CSV_DOC_LINK: "https://docs.oasys.games/docs/staking/explore/1-2-csv-download"
+      RE_CAPTCHA_DISABLED: "true"
     volumes:
       - ./l1:/l1:ro
     ports:
@@ -247,28 +246,28 @@ services:
     <<: *resident
     image: ghcr.io/oasysgames/oasys-blockscout:v5.2.1-beta1
     environment:
-      NETWORK: ' '
-      SUBNETWORK: 'Private OP Stack'
+      NETWORK: " "
+      SUBNETWORK: "Private OP Stack"
       ETHEREUM_JSONRPC_VARIANT: geth
       ETHEREUM_JSONRPC_HTTP_URL: $OP_ETH_RPC_HTTP
       ETHEREUM_JSONRPC_TRACE_URL: $OP_ETH_RPC_HTTP
       ETHEREUM_JSONRPC_WS_URL: $OP_ETH_RPC_WS
       DATABASE_URL: postgresql://postgres:postgres@postgres:5432/l2_blockscout?ssl=false
-      ECTO_USE_SSL: 'false'
+      ECTO_USE_SSL: "false"
       POOL_SIZE: 10
       POOL_SIZE_API: 10
       ACCOUNT_POOL_SIZE: 10
-      SUPPORTED_CHAINS: '[]'
+      SUPPORTED_CHAINS: "[]"
       CHAIN_SPEC_PATH: /op-node/genesis.json
       PORT: $OP_BLOCKSCOUT_PORT
-      SECRET_KEY_BASE: 'U6434qTISQ7ozqRb1kzstkJzyfgWRIwFTefjNWT9laHMbFE9oat5U4Tshptux5yl'
+      SECRET_KEY_BASE: "U6434qTISQ7ozqRb1kzstkJzyfgWRIwFTefjNWT9laHMbFE9oat5U4Tshptux5yl"
       COIN_NAME: OAS
       BLOCKSCOUT_PROTOCOL: http
       BLOCKSCOUT_HOST: 127.0.0.1:$OP_BLOCKSCOUT_PORT
       WEBAPP_URL: http://127.0.0.1:$OP_BLOCKSCOUT_PORT
       API_URL: http://127.0.0.1:$OP_BLOCKSCOUT_PORT
-      CSV_DOC_LINK: 'https://docs.oasys.games/docs/staking/explore/1-2-csv-download'
-      RE_CAPTCHA_DISABLED: 'true'
+      CSV_DOC_LINK: "https://docs.oasys.games/docs/staking/explore/1-2-csv-download"
+      RE_CAPTCHA_DISABLED: "true"
     volumes:
       - ./data/op-node:/op-node:ro
     ports:
@@ -350,28 +349,28 @@ services:
     <<: *resident
     image: ghcr.io/oasysgames/oasys-blockscout:v5.2.1-beta1
     environment:
-      NETWORK: ' '
-      SUBNETWORK: 'Private OP Stack Replica'
+      NETWORK: " "
+      SUBNETWORK: "Private OP Stack Replica"
       ETHEREUM_JSONRPC_VARIANT: geth
       ETHEREUM_JSONRPC_HTTP_URL: http://op-geth-replica:8545
       ETHEREUM_JSONRPC_TRACE_URL: http://op-geth-replica:8545
       ETHEREUM_JSONRPC_WS_URL: ws://op-geth-replica:8546
       DATABASE_URL: postgresql://postgres:postgres@postgres:5432/l2_blockscout_replica?ssl=false
-      ECTO_USE_SSL: 'false'
+      ECTO_USE_SSL: "false"
       POOL_SIZE: 10
       POOL_SIZE_API: 10
       ACCOUNT_POOL_SIZE: 10
-      SUPPORTED_CHAINS: '[]'
+      SUPPORTED_CHAINS: "[]"
       CHAIN_SPEC_PATH: /op-node/genesis.json
       PORT: $OP_BLOCKSCOUT_REPLICA_PORT
-      SECRET_KEY_BASE: 'U6434qTISQ7ozqRb1kzstkJzyfgWRIwFTefjNWT9laHMbFE9oat5U4Tshptux5yl'
+      SECRET_KEY_BASE: "U6434qTISQ7ozqRb1kzstkJzyfgWRIwFTefjNWT9laHMbFE9oat5U4Tshptux5yl"
       COIN_NAME: OAS
       BLOCKSCOUT_PROTOCOL: http
       BLOCKSCOUT_HOST: 127.0.0.1:$OP_BLOCKSCOUT_REPLICA_PORT
       WEBAPP_URL: http://127.0.0.1:$OP_BLOCKSCOUT_REPLICA_PORT
       API_URL: http://127.0.0.1:$OP_BLOCKSCOUT_REPLICA_PORT
-      CSV_DOC_LINK: 'https://docs.oasys.games/docs/staking/explore/1-2-csv-download'
-      RE_CAPTCHA_DISABLED: 'true'
+      CSV_DOC_LINK: "https://docs.oasys.games/docs/staking/explore/1-2-csv-download"
+      RE_CAPTCHA_DISABLED: "true"
     volumes:
       - ./data/op-node:/op-node:ro
     ports:
@@ -410,13 +409,26 @@ services:
 
   # Message relayer
   message-relayer:
+    image: node:20.8.0-alpine
+    working_dir: /usr/src/app
+    volumes:
+      - $MESSAGE_LAYER/src:/usr/src/app/src
+      - $MESSAGE_LAYER/package.json:/usr/src/app/package.json
+      - $MESSAGE_LAYER/docker-entrypoint.sh:/usr/src/app/docker-entrypoint.sh
     restart: always
-    env_file: $MESSAGE_LAYER/.env
-    build: 
-      context: $MESSAGE_LAYER
-      dockerfile: Dockerfile
-    expose:
-      - 7300
+    environment:
+      MESSAGE_RELAYER__LOG_LEVEL: debug
+      MESSAGE_RELAYER__LOOP_INTERVAL_MS: 5000
+      MESSAGE_RELAYER__L1_RPC_PROVIDER: $L1_ETH_RPC_HTTP
+      MESSAGE_RELAYER__L2_RPC_PROVIDER: $OP_ETH_RPC_HTTP
+      MESSAGE_RELAYER__ADDRESS_MANAGER: $MR_ADDRESS_MANAGER
+      MESSAGE_RELAYER__L1_CROSS_DOMAIN_MESSENGER: $MR_L1_CROSS_DOMAIN_MESSENGER
+      MESSAGE_RELAYER__PORTAL_ADDRESS: $MR_PORTAL_ADDRESS
+      MESSAGE_RELAYER__OUTPUT_ORACLE: $OP_L2OO_ADDR
+      MESSAGE_RELAYER__MULTICALL_ADDRESS: $MR_MULTICALL_ADDRESS
+      MESSAGE_RELAYER__PROVER_PRIVATE_KEY: $MR_PROVER_KEY
+      MESSAGE_RELAYER__FINALIZER_PRIVATE_KEY: $MR_FINALIZER_KEY
     depends_on:
       - l1-rpc
       - op-geth
+    command: ["sh", "docker-entrypoint.sh"]

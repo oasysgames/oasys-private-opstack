@@ -183,40 +183,20 @@ Open the replica explorer ([http://127.0.0.1:4002/](http://127.0.0.1:4002/)). L2
 
 ## Setup Message Relayer
 
-1. Go to message_relayer folder
-```shell
-cd message_relayer
-```
-2. Set up env 
-
-```shell
-cp .env.example .env
-
 # Edit the .env file to set your environment variables:
-vi .env
-```
-To get MESSAGE_RELAYER__PROVER_PRIVATE_KEY, MESSAGE_RELAYER__FINALIZER_PRIVATE_KEY go to env from private-opstack
 
-To get MESSAGE_RELAYER__ADDRESS_MANAGER, MESSAGE_RELAYER__L1_CROSS_DOMAIN_MESSENGER,
-MESSAGE_RELAYER__PORTAL_ADDRESS,
-MESSAGE_RELAYER__OUTPUT_ORACLE
+To get MR_ADDRESS_MANAGER, MR_L1_CROSS_DOMAIN_MESSENGER,
+MR_PORTAL_ADDRESS,
 
 ```sh
 jq -r .AddressManager tmp/oasys/L1/build/Build.s.sol/latest/addresses.json
 jq -r .L1CrossDomainMessengerProxy tmp/oasys/L1/build/Build.s.sol/latest/addresses.json
 jq -r .OptimismPortalProxy tmp/oasys/L1/build/Build.s.sol/latest/addresses.json
-jq -r .L2OutputOracleProxy tmp/oasys/L1/build/Build.s.sol/latest/addresses.json
 ```
 
+Finally, set the address to env
 
-3. Deploy Multisig
-```shell
-pnpm run deploy
-```
-
-After deploy you will get `MESSAGE_RELAYER__MULTICALL_ADDRESS`, you need to fill in .env
-
-Back to current repo and run docker
+Run message relayer
 ```shell
 docker-compose up -d message-relayer --build
 ```
