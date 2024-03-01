@@ -1,6 +1,6 @@
 # Oasys Private OPStack
 Using this repository, you can set up private L1 and L2 Oasys networks. The L2 network utilizes the opstack version of Verse.
-This repo was initially created for internal opstack integration testing.
+This repo was initially created for internal opstack integration testing. Utilizing this repository allows you to construct a private network, serving a variety of purposes. Whether it's to understand how the OpStack version operates from the perspective of Verse builders, for job training to deepen your understanding of OpStack, or for other applications, this repo offers the flexibility needed to explore and learn about the technology in depth.
 
 ## Setup L1 and OP Stack 
 
