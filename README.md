@@ -198,7 +198,7 @@ Finally, set the address to env
 
 Run message relayer
 ```shell
-docker-compose up -d message-relayer --build
+docker-compose up -d message-relayer
 ```
 
 ## Setup OP Stack SDK
