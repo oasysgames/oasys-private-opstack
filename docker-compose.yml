@@ -411,9 +411,8 @@ services:
   # Message relayer
   message-relayer:
     <<: *resident
-    build:
-      context: ./l2/message-relayer
-      dockerfile: Dockerfile
+    image: node:20.8.0-alpine
+    command: ['./node_modules/.bin/tsx', './src/service.ts']
     working_dir: /usr/src/app
     stop_grace_period: 2m30s # wait for all the multi-call transactions to be processed
     environment:
