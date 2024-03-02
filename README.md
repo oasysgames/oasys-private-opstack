@@ -187,6 +187,7 @@ docker-compose up -d op-geth-replica op-node-replica op-blockscout-replica
 
 Open the replica explorer ([http://127.0.0.1:4002/](http://127.0.0.1:4002/)). L2 block is synchronized with about a 1-minute delay. Synchronization can be sped up by reducing the `--verifier.l1-confs` in the op-node-replica service.
 
+
 ## Setup OP Stack SDK
 
 To use the [OP Stack SDK](https://community.optimism.io/docs/sdk/) on a private chain, take a few [extra steps](https://stack.optimism.io/docs/build/sdk/#not-natively-supported-chains) is required. By using this script, you can skip those steps and use the SDK.
