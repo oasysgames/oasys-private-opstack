@@ -52,3 +52,12 @@ services:
       # dependency cache
       - ./tmp/build-cache/op-monorepo/go:/go
       - ./tmp/build-cache/op-monorepo/go-build:/root/.cache/go-build
+
+  message-relayer:
+    image: node:20.8.0-alpine
+    entrypoint: npm install pnpm@8.10.3 && pnpm install
+    working_dir: /app
+    volumes:
+      - $MR_REPO:/app
+      # dependency cache
+      - ./tmp/build-cache/message-relayer/node_modules:/app/node_modules

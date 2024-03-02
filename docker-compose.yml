@@ -409,26 +409,30 @@ services:
 
   # Message relayer
   message-relayer:
+    <<: *resident
     image: node:20.8.0-alpine
+    entrypoint: npx tsx ./src/service.ts
     working_dir: /usr/src/app
-    volumes:
-      - $MESSAGE_LAYER/src:/usr/src/app/src
-      - $MESSAGE_LAYER/package.json:/usr/src/app/package.json
-      - $MESSAGE_LAYER/docker-entrypoint.sh:/usr/src/app/docker-entrypoint.sh
-    restart: always
     environment:
-      MESSAGE_RELAYER__LOG_LEVEL: debug
+      MESSAGE_RELAYER__LOG_LEVEL: info
       MESSAGE_RELAYER__LOOP_INTERVAL_MS: 5000
       MESSAGE_RELAYER__L1_RPC_PROVIDER: $L1_ETH_RPC_HTTP
       MESSAGE_RELAYER__L2_RPC_PROVIDER: $OP_ETH_RPC_HTTP
-      MESSAGE_RELAYER__ADDRESS_MANAGER: $MR_ADDRESS_MANAGER
-      MESSAGE_RELAYER__L1_CROSS_DOMAIN_MESSENGER: $MR_L1_CROSS_DOMAIN_MESSENGER
-      MESSAGE_RELAYER__PORTAL_ADDRESS: $MR_PORTAL_ADDRESS
+      MESSAGE_RELAYER__ADDRESS_MANAGER: $OP_AM_ADDR
+      MESSAGE_RELAYER__L1_CROSS_DOMAIN_MESSENGER: $OP_L1CDM_ADDR
+      MESSAGE_RELAYER__PORTAL_ADDRESS: $OP_PORTAL_ADDR
       MESSAGE_RELAYER__OUTPUT_ORACLE: $OP_L2OO_ADDR
-      MESSAGE_RELAYER__MULTICALL_ADDRESS: $MR_MULTICALL_ADDRESS
+      MESSAGE_RELAYER__MULTICALL_ADDRESS: 0x5200000000000000000000000000000000000022
       MESSAGE_RELAYER__PROVER_PRIVATE_KEY: $MR_PROVER_KEY
       MESSAGE_RELAYER__FINALIZER_PRIVATE_KEY: $MR_FINALIZER_KEY
-    depends_on:
+      MESSAGE_RELAYER__STATE_FILE_PATH: /usr/src/app/state/state.json
+      MESSAGE_RELAYER__QUEUE_PATH=: /usr/src/app/store
+    volumes:
+      - $MR_REPO/src:/usr/src/app/src:ro
+      - $MR_REPO/package.json:/usr/src/app/package.json:ro
+      - ./tmp/build-cache/message-relayer/node_modules:/usr/src/app/node_modules:ro
+      - ./data/message-relayer/state:/usr/src/app/state
+      - ./data/message-relayer/store:/usr/src/app/store
+    links:
       - l1-rpc
       - op-geth
-    command: ["sh", "docker-entrypoint.sh"]

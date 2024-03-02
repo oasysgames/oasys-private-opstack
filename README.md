@@ -43,7 +43,7 @@ Add the absolute path of the repository cloned earlier.
 L1_GETH_REPO=<oasys-validator>
 OP_MONO_REPO=<oasys-opstack>
 OP_GETH_REPO=<oasys-op-geth>
-MESSAGE_LAYER=<opstack-message-layer>
+MR_REPO=<opstack-message-layer>
 ```
 
 ### Build components
@@ -54,7 +54,7 @@ Build the L1 geth and OP Stack components.
 docker-compose -f ./docker-compose.build.yml up
 
 # build a specific component (fast)
-docker-compose -f ./docker-compose.build.yml up {l1-geth,op-geth,op-node,op-batcher,op-proposer}
+docker-compose -f ./docker-compose.build.yml up {l1-geth,op-geth,op-node,op-batcher,op-proposer,message-relayer}
 ```
 
 The built binaries are created within each repository.
@@ -125,6 +125,12 @@ forge script --rpc-url $L1_RPC_URL --sender $OP_ADMIN_ADDR --private-key $OP_ADM
 
 # Get the address of the `L2OutputOracleProxy` contract.
 jq -r .L2OutputOracleProxy tmp/oasys/L1/build/Build.s.sol/latest/addresses.json
+# Get the address of the `AddressManager` contract
+jq -r .AddressManager tmp/oasys/L1/build/Build.s.sol/latest/addresses.json
+# Get the address of `L1CrossDomainMessengerProxy` contract
+jq -r .L1CrossDomainMessengerProxy tmp/oasys/L1/build/Build.s.sol/latest/addresses.json
+# Get the address of `OptimismPortalProxy` contract
+jq -r .OptimismPortalProxy tmp/oasys/L1/build/Build.s.sol/latest/addresses.json
 ```
 
 Finally, set the address of the L2OutputOracleProxy as `OP_L2OO_ADDR` in the `.env` file.
@@ -162,7 +168,7 @@ INFO [11-09|16:06:49.261] Successfully wrote genesis state         database=ligh
 
 Run services of OP Stack.
 ```shell
-docker-compose up -d op-geth op-node op-batcher op-proposer op-blockscout
+docker-compose up -d op-geth op-node op-batcher op-proposer op-blockscout message-relayer
 ```
 
 Open the OP Stack explorer ([http://127.0.0.1:4001/](http://127.0.0.1:4001/)). If op-geth and op-node are running correctly, blocks should be being created every 5 seconds.
@@ -180,26 +186,6 @@ docker-compose up -d op-geth-replica op-node-replica op-blockscout-replica
 ```
 
 Open the replica explorer ([http://127.0.0.1:4002/](http://127.0.0.1:4002/)). L2 block is synchronized with about a 1-minute delay. Synchronization can be sped up by reducing the `--verifier.l1-confs` in the op-node-replica service.
-
-## Setup Message Relayer
-
-# Edit the .env file to set your environment variables:
-
-To get MR_ADDRESS_MANAGER, MR_L1_CROSS_DOMAIN_MESSENGER,
-MR_PORTAL_ADDRESS,
-
-```sh
-jq -r .AddressManager tmp/oasys/L1/build/Build.s.sol/latest/addresses.json
-jq -r .L1CrossDomainMessengerProxy tmp/oasys/L1/build/Build.s.sol/latest/addresses.json
-jq -r .OptimismPortalProxy tmp/oasys/L1/build/Build.s.sol/latest/addresses.json
-```
-
-Finally, set the address to env
-
-Run message relayer
-```shell
-docker-compose up -d message-relayer
-```
 
 ## Setup OP Stack SDK
 
