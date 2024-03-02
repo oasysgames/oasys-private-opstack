@@ -55,9 +55,10 @@ services:
 
   message-relayer:
     image: node:20.8.0-alpine
-    entrypoint: npm install pnpm@8.10.3 && pnpm install
+    entrypoint: sh ./build.sh
     working_dir: /app
     volumes:
       - $MR_REPO:/app
+      - ./l2/message-relayer/build.sh:/app/build.sh
       # dependency cache
-      - ./tmp/build-cache/message-relayer/node_modules:/app/node_modules
+      - ./tmp/build-cache/message-relayer/pnpm-store:/tmp/pnpm-store

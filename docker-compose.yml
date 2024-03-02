@@ -431,7 +431,7 @@ services:
     volumes:
       - $MR_REPO/src:/usr/src/app/src:ro
       - $MR_REPO/package.json:/usr/src/app/package.json:ro
-      - ./tmp/build-cache/message-relayer/node_modules:/usr/src/app/node_modules:ro
+      - $MR_REPO/node_modules:/usr/src/app/node_modules:ro
       - ./data/message-relayer/state:/usr/src/app/state
       - ./data/message-relayer/store:/usr/src/app/store
     links:
