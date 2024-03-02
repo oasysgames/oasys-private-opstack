@@ -55,7 +55,7 @@ services:
 
   message-relayer:
     image: node:20.8.0-alpine
-    entrypoint: sh ./build.sh
+    entrypoint: /bin/sh ./build.sh
     working_dir: /app
     volumes:
       - $MR_REPO:/app

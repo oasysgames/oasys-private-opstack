@@ -411,9 +411,11 @@ services:
   # Message relayer
   message-relayer:
     <<: *resident
-    image: node:20.8.0-alpine
-    entrypoint: npx tsx ./src/service.ts
+    build:
+      context: ./l2/message-relayer
+      dockerfile: Dockerfile
     working_dir: /usr/src/app
+    stop_grace_period: 1m30s # wait for all the multi-call transactions to be processed
     environment:
       MESSAGE_RELAYER__LOG_LEVEL: info
       MESSAGE_RELAYER__LOOP_INTERVAL_MS: 5000
@@ -434,6 +436,8 @@ services:
       - $MR_REPO/node_modules:/usr/src/app/node_modules:ro
       - ./data/message-relayer/state:/usr/src/app/state
       - ./data/message-relayer/store:/usr/src/app/store
+    ports:
+      - 7300:7300/tcp
     links:
       - l1-rpc
       - op-geth
