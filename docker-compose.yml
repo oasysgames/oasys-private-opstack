@@ -9,7 +9,8 @@ x-resident: &resident
       max-size: 128m
       max-file: 1
 
-x-oneshot: &oneshot # prevent startup with `docker-compose up -d`
+x-oneshot: &oneshot
+  # prevent startup with `docker-compose up -d`
   profiles:
     - oneshot
 
