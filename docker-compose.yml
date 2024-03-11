@@ -243,6 +243,15 @@ services:
       - l1-rpc
       - op-node
 
+  instant-verifier:
+    <<: *resident
+    image: ghcr.io/oasysgames/verse-verifier:v0.0.11-673dffa
+    entrypoint: /usr/local/bin/oasvlfy --config /data/config.yml
+    command: start
+    volumes:
+      - ./l1:/l1:ro
+      - ./data/instant-verifier:/data
+
   op-blockscout:
     <<: *resident
     image: ghcr.io/oasysgames/oasys-blockscout:v5.2.1-beta1

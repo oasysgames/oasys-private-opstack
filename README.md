@@ -164,6 +164,17 @@ docker-compose up -d op-geth op-node op-batcher op-proposer op-blockscout
 
 Open the OP Stack explorer ([http://127.0.0.1:4001/](http://127.0.0.1:4001/)). If op-geth and op-node are running correctly, blocks should be being created every 5 seconds.
 
+### Run instant verifier
+Generate config file.
+```shell
+docker-compose run --rm -v $PWD/data/instant-verifier:/work foundry 'bash misc/foundry/oasys-verifier-config.sh > /work/config.yml'
+```
+
+Run the instant verifier.
+```shell
+docker-compose up -d instant-verifier
+```
+
 ### Run OP Stack Replica Services
 
 Generate the genesis block of the replica op-geth.
