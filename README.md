@@ -16,6 +16,8 @@ git clone --recursive https://github.com/oasysgames/oasys-validator.git
 git clone https://github.com/oasysgames/oasys-opstack.git
 
 git clone https://github.com/oasysgames/oasys-op-geth.git
+
+git clone https://github.com/oasysgames/opstack-message-relayer
 ```
 
 The `oasys-validator` repository checks out a release tag for a testnet that allows for free contract deployment.
@@ -41,6 +43,7 @@ Add the absolute path of the repository cloned earlier.
 L1_GETH_REPO=<oasys-validator>
 OP_MONO_REPO=<oasys-opstack>
 OP_GETH_REPO=<oasys-op-geth>
+MR_REPO=<opstack-message-layer>
 ```
 
 ### Build components
@@ -51,7 +54,7 @@ Build the L1 geth and OP Stack components.
 docker-compose -f ./docker-compose.build.yml up
 
 # build a specific component (fast)
-docker-compose -f ./docker-compose.build.yml up {l1-geth,op-geth,op-node,op-batcher,op-proposer}
+docker-compose -f ./docker-compose.build.yml up {l1-geth,op-geth,op-node,op-batcher,op-proposer,message-relayer}
 ```
 
 The built binaries are created within each repository.
@@ -122,6 +125,12 @@ forge script --rpc-url $L1_RPC_URL --sender $OP_ADMIN_ADDR --private-key $OP_ADM
 
 # Get the address of the `L2OutputOracleProxy` contract.
 jq -r .L2OutputOracleProxy tmp/oasys/L1/build/Build.s.sol/latest/addresses.json
+# Get the address of the `AddressManager` contract
+jq -r .AddressManager tmp/oasys/L1/build/Build.s.sol/latest/addresses.json
+# Get the address of `L1CrossDomainMessengerProxy` contract
+jq -r .L1CrossDomainMessengerProxy tmp/oasys/L1/build/Build.s.sol/latest/addresses.json
+# Get the address of `OptimismPortalProxy` contract
+jq -r .OptimismPortalProxy tmp/oasys/L1/build/Build.s.sol/latest/addresses.json
 ```
 
 Finally, set the address of the L2OutputOracleProxy as `OP_L2OO_ADDR` in the `.env` file.
@@ -159,7 +168,7 @@ INFO [11-09|16:06:49.261] Successfully wrote genesis state         database=ligh
 
 Run services of OP Stack.
 ```shell
-docker-compose up -d op-geth op-node op-batcher op-proposer op-blockscout
+docker-compose up -d op-geth op-node op-batcher op-proposer op-blockscout message-relayer
 ```
 
 Open the OP Stack explorer ([http://127.0.0.1:4001/](http://127.0.0.1:4001/)). If op-geth and op-node are running correctly, blocks should be being created every 5 seconds.
