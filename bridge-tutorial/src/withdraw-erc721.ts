@@ -14,7 +14,7 @@ const messenger = opsdk.getCrossChainMessenger({
   bridgeAdapter: {
     adapter: ERC721BridgeAdapter,
     l1Bridge: opsdk.l1Contracts.L1ERC721BridgeProxy,
-    l2Bridge: "0x4200000000000000000000000000000000000014",
+    l2Bridge: "0x6200000000000000000000000000000000000001",
   },
 });
 
