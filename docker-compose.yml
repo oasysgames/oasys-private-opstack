@@ -437,7 +437,7 @@ services:
       MESSAGE_RELAYER__PROVER_PRIVATE_KEY: $MR_PROVER_KEY
       MESSAGE_RELAYER__FINALIZER_PRIVATE_KEY: $MR_FINALIZER_KEY
       MESSAGE_RELAYER__STATE_FILE_PATH: /usr/src/app/state/state.json
-      MESSAGE_RELAYER__QUEUE_PATH=: /usr/src/app/store
+      MESSAGE_RELAYER__QUEUE_PATH: /usr/src/app/store
     volumes:
       - $MR_REPO/src:/usr/src/app/src:ro
       - $MR_REPO/package.json:/usr/src/app/package.json:ro

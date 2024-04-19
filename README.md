@@ -2,7 +2,7 @@
 Using this repository, you can set up private L1 and L2 Oasys networks. The L2 network utilizes the opstack version of Verse.
 This repo was initially created for internal opstack integration testing. Utilizing this repository allows you to construct a private network, serving a variety of purposes. Whether it's to understand how the OpStack version operates from the perspective of Verse builders, for job training to deepen your understanding of OpStack, or for other applications, this repo offers the flexibility needed to explore and learn about the technology in depth.
 
-## Setup L1 and OP Stack 
+## Setup L1 and OP Stack
 
 ### Clone repositories
 
@@ -11,7 +11,7 @@ Clone repositories to any location you prefer.
 ```shell
 # mkdir ~/your/dev/dir && cd ~/your/dev/dir
 
-git clone --recursive https://github.com/oasysgames/oasys-validator.git 
+git clone --recursive https://github.com/oasysgames/oasys-validator.git
 
 git clone https://github.com/oasysgames/oasys-opstack.git
 
@@ -76,7 +76,7 @@ docker-compose up -d l1-web l1-rpc l1-validator1 l1-blockscout
 
 > l1-validator2 and l1-validator3 are optional.
 
-L1 block creation starts automatically, so execute `l1-validator1` staking within the 1st epoch (40 blocks). Open the l1-web ([http://127.0.0.1:8080/](http://127.0.0.1:8080/)) and click `1. Join` and `2. Stake` button. 
+L1 block creation starts automatically, so execute `l1-validator1` staking within the 1st epoch (40 blocks). Open the l1-web ([http://127.0.0.1:8080/](http://127.0.0.1:8080/)) and click `1. Join` and `2. Stake` button.
 
 ![Join & Stake](./.README/join-and-stake.jpg)
 
@@ -118,10 +118,6 @@ forge script --rpc-url $L1_RPC_URL --private-key $HH_ACCOUNT_0 --broadcast \
 # Note: You can use any private key.
 forge script --rpc-url $L1_RPC_URL --private-key $HH_ACCOUNT_0 --broadcast \
   scripts/oasys/L1/build/Build.s.sol:Build
-
-# Set the message relayer address to the OasysPortal.
-forge script --rpc-url $L1_RPC_URL --sender $OP_ADMIN_ADDR --private-key $OP_ADMIN_KEY --broadcast \
-  scripts/oasys/L1/build/Build.s.sol:SetMessageRelayer
 
 # Get the address of the `L2OutputOracleProxy` contract.
 jq -r .L2OutputOracleProxy tmp/oasys/L1/build/Build.s.sol/latest/addresses.json
@@ -238,7 +234,7 @@ The IP address of the container changes with start/stop, but geth may be caching
 ```shell
 docker-compose stop l1-rpc l1-validator1
 
-rm -rf data/l1-*/geth/nodes 
+rm -rf data/l1-*/geth/nodes
 
 docker-compose up -d l1-rpc l1-validator1
 ```
