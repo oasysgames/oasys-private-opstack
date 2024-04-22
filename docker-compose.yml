@@ -245,7 +245,7 @@ services:
 
   instant-verifier:
     <<: *resident
-    image: ghcr.io/oasysgames/verse-verifier:v0.0.11-673dffa
+    image: ghcr.io/oasysgames/verse-verifier:v1.0.0
     entrypoint: /usr/local/bin/oasvlfy --config /data/config.yml
     command: start
     volumes:
