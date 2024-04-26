@@ -76,7 +76,8 @@ docker-compose up -d l1-web l1-rpc l1-validator1 l1-blockscout
 
 > l1-validator2 and l1-validator3 are optional.
 
-L1 block creation starts automatically, so execute `l1-validator1` staking within the 1st epoch (40 blocks). Open the l1-web ([http://127.0.0.1:8080/](http://127.0.0.1:8080/)) and click `1. Join` and `2. Stake` button.
+L1 block creation starts automatically, so execute `l1-validator1` **staking within the 1st epoch (40 blocks)**. Open the l1-web ([http://127.0.0.1:8080/](http://127.0.0.1:8080/)) and click `1. Join` and `2. Stake` button. If you fail to join and stake within 40 blocks, you may encounter [this issue](https://github.com/oasysgames/oasys-private-opstack/issues/26).
+
 
 ![Join & Stake](./.README/join-and-stake.jpg)
 
