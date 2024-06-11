@@ -95,7 +95,7 @@ services:
   ## Explorer
   l1-blockscout:
     <<: *resident
-    image: ghcr.io/oasysgames/oasys-blockscout:v5.2.1-beta1
+    image: ghcr.io/oasysgames/oasys-blockscout:v5.2.2-beta
     environment:
       NETWORK: ' '
       SUBNETWORK: 'Private Hub-Layer'
@@ -255,7 +255,7 @@ services:
 
   op-blockscout:
     <<: *resident
-    image: ghcr.io/oasysgames/oasys-blockscout:v5.2.1-beta1
+    image: ghcr.io/oasysgames/oasys-blockscout:v5.2.2-beta
     environment:
       NETWORK: ' '
       SUBNETWORK: 'Private OP Stack'
@@ -358,7 +358,7 @@ services:
 
   op-blockscout-replica:
     <<: *resident
-    image: ghcr.io/oasysgames/oasys-blockscout:v5.2.1-beta1
+    image: ghcr.io/oasysgames/oasys-blockscout:v5.2.2-beta
     environment:
       NETWORK: ' '
       SUBNETWORK: 'Private OP Stack Replica'
