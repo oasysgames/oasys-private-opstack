@@ -126,6 +126,8 @@ jq -r .L2OutputOracleProxy tmp/oasys/L1/build/Build.s.sol/latest/addresses.json
 jq -r .AddressManager tmp/oasys/L1/build/Build.s.sol/latest/addresses.json
 # Get the address of `L1CrossDomainMessengerProxy` contract
 jq -r .L1CrossDomainMessengerProxy tmp/oasys/L1/build/Build.s.sol/latest/addresses.json
+# Get the address of `L1StandardBridgeProxy` contract
+jq -r .L1StandardBridgeProxy tmp/oasys/L1/build/Build.s.sol/latest/addresses.json
 # Get the address of `OptimismPortalProxy` contract
 jq -r .OptimismPortalProxy tmp/oasys/L1/build/Build.s.sol/latest/addresses.json
 ```
