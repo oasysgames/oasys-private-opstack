@@ -4,7 +4,7 @@ name: private-opstack-builder
 
 services:
   l1-geth:
-    image: golang:1.17-stretch
+    image: golang:1.21-bookworm
     entrypoint: make geth
     working_dir: /app
     volumes:

@@ -15,7 +15,7 @@ x-oneshot: &oneshot
     - oneshot
 
 x-l1-geth: &l1-geth
-  image: golang:1.17-stretch
+  image: golang:1.21-bookworm
   entrypoint: /bin/sh /l1/validator/entrypoint.sh
 
 x-l1-geth-env: &l1-geth-env
