@@ -157,6 +157,7 @@ services:
       --authrpc.jwtsecret=/l2/jwt.txt
       --txpool.pricelimit=0
       --rollup.superchain-upgrades=false
+      --override.canyon=0
     volumes:
       - ./l2:/l2:ro
       - $OP_GETH_REPO/build/bin:/usr/local/bin:ro
