@@ -156,6 +156,15 @@
           const method = stakemanager(validator.owner)
             .methods.unstakeV2(validator.owner.address, 0, amount)
           sendTransaction(method, { gas: 1000000 })
+        },
+        updateBLSKey: async (validator) => {
+          const input = window.prompt(`BLS Key`)
+          if (input === null) return
+          const key = input || validator.blsKey
+
+          const method = stakemanager(validator.owner)
+            .methods.updateBLSPublicKey(key)
+          sendTransaction(method, { gas: 1000000 })
         }
       }
 
@@ -252,6 +261,7 @@
                 <th>name</th>
                 <th>owner</th>
                 <th>operator</th>
+                <th>BLS Key</th>
                 <th>joined</th>
                 <th>stakes</th>
                 <th>operations</th>
@@ -262,12 +272,14 @@
                 <td>{x.name}</td>
                 <td>{x.owner.address}</td>
                 <td>{x.operator}</td>
+                <td>{x.blsKey}</td>
                 <td>{joined(x)}</td>
                 <td>{stakes(x)}</td>
                 <td>
                   <button onClick={() => operations.join(x)} disabled={sending}>Join</button>
                   <button onClick={() => operations.stake(x)} disabled={sending}>Stake</button>
                   <button onClick={() => operations.unstake(x)} disabled={sending}>Unstake</button>
+                  <button onClick={() => operations.updateBLSKey(x)} disabled={sending}>UpdateBLS</button>
                 </td>
               </tr>))}
             </tbody>
@@ -356,6 +368,12 @@
       width: auto;
       border-collapse: collapse;
       border-spacing: 0;
+    }
+
+    table, th, td {
+      max-width: 1500px;
+      word-wrap: break-word;
+      word-break: break-word;
     }
 
     table th {

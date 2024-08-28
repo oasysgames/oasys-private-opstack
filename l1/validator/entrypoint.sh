@@ -14,6 +14,7 @@ fi
 if [ -n "$ETHERBASE" ]; then
   OPTS="$OPTS --mine --miner.etherbase $ETHERBASE --miner.gaslimit 30000000"
   OPTS="$OPTS --keystore $KEYSTORE --unlock $ETHERBASE --password /dev/null --allow-insecure-unlock"
+  OPTS="$OPTS --vote=true --blswallet=$BLS_WALLET/wallet --blspassword=$BLS_WALLET/password.txt --vote-journal-path=$VOTEJOURNAL"
 fi
 
 exec geth \

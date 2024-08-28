@@ -454,6 +454,31 @@ const StakeManagerABI = [
       {
         indexed: true,
         internalType: "address",
+        name: "validator",
+        type: "address"
+      },
+      {
+        indexed: false,
+        internalType: "bytes",
+        name: "oldBLSPublicKey",
+        type: "bytes"
+      },
+      {
+        indexed: false,
+        internalType: "bytes",
+        name: "newBLSPublicKey",
+        type: "bytes"
+      }
+    ],
+    name: "BLSPublicKeyUpdated",
+    type: "event"
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: true,
+        internalType: "address",
         name: "staker",
         type: "address",
       },
@@ -1161,6 +1186,11 @@ const StakeManagerABI = [
         name: "stakes",
         type: "uint256",
       },
+      {
+        internalType: "bytes",
+        name: "blsPublicKey",
+        type: "bytes"
+      }
     ],
     stateMutability: "view",
     type: "function",
@@ -1296,6 +1326,11 @@ const StakeManagerABI = [
         internalType: "uint256[]",
         name: "stakes",
         type: "uint256[]",
+      },
+      {
+        internalType: "bytes[]",
+        name: "blsPublicKeys",
+        type: "bytes[]"
       },
       {
         internalType: "bool[]",
@@ -1472,6 +1507,19 @@ const StakeManagerABI = [
     outputs: [],
     stateMutability: "nonpayable",
     type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "bytes",
+        name: "blsPublicKey",
+        type: "bytes"
+      }
+    ],
+    name: "updateBLSPublicKey",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function"
   },
 ];
 
