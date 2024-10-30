@@ -14,6 +14,7 @@
     "londonBlock": 0,
     "shanghaiTime": 0,
     "oasysFork1Block": 70,
+    "cancunTime": 0,
     "oasys": {
       "period": 10,
       "epoch": 40

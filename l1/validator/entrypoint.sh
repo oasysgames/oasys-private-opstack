@@ -22,4 +22,5 @@ exec geth \
   --syncmode full --gcmode archive --networkid $NETWORK_ID \
   --http --http.addr 0.0.0.0 --http.vhosts '*' --http.corsdomain '*' --http.api net,eth,web3,txpool,debug,admin \
   --ws --ws.addr 0.0.0.0 --ws.origins '*' --ws.api net,eth,web3,txpool,debug,admin \
+  --fake-beacon --fake-beacon.addr 0.0.0.0 \
   $OPTS $@
