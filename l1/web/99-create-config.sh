@@ -4,7 +4,7 @@ config=$(cat << EOL
 const config = {
   l1: {
     chainId: $L1_CHAIN_ID,
-    rpc: '$L1_RPC',
+    rpc: 'http://127.0.0.1:$L1_WEB_PORT/rpc',
     explorer: '$L1_EXPLORER',
   },
   op: {
@@ -21,25 +21,31 @@ const config = {
     stakemanager: '0x0000000000000000000000000000000000001001',
     candidatemanager: '0x520000000000000000000000000000000000002e',
   },
-  validators: [
+  nodes: [
+    {
+      name: 'rpc',
+      rpc: 'http://127.0.0.1:$L1_WEB_PORT/rpc',
+    },
     {
       name: 'validator1',
+      rpc: 'http://127.0.0.1:$L1_WEB_PORT/validator1',
       ownerKey: '0x92643dfbc8573869fe5dfeee88dc80ebb320ec60b63705bbbada7ec3fe2c6bfe',
       operator: '0xA889698683900857FA9AC54FBC972e88292b5387',
-      blsKey: '0x956213e2b4cf37613b342e67d8e184d3b8e18307f428690a5e0222ebb3ba6baa98b22a20fc25117e795f24f74ccdae80',
-      verifier: true,
+      blsKey: '0xaa7f37191b9d0d362cb997b1032d67393f19ee8eeaf46ab0e8ed79d1270e36e966eeeb9d41dabe3100323a3fdd65b810',
     },
     {
       name: 'validator2',
+      rpc: 'http://127.0.0.1:$L1_WEB_PORT/validator2',
       ownerKey: '0xf5e95eb3a1f5e40689dea73bb4e8bab3d37684de6a881c12efe24f6ce506409b',
       operator: '0xB07F340E051cc0db4d9d4fD115B148993994DddD',
-      blsKey: '0xaee34f6fefcda064eb660092d8191074d1eecb7405f614631449e483a2ef7a26d8be1ea8ae04a388f1d0c205c9c2cd8b',
+      blsKey: '0x89f90efb8b392d697b0513b00ceb07e7806ab4c0876db7a0ad7f8b350a52b6c571701ea85a854a82d00d04b5fbbc128b',
     },
     {
       name: 'validator3',
+      rpc: 'http://127.0.0.1:$L1_WEB_PORT/validator3',
       ownerKey: '0x3da6e34cbe2db96e74ab22269cfa22fde7badd670550d759917d606866beb485',
       operator: '0x9a8490E0faE649cA0ED0b221E4FadCa9a44Cd93e',
-      blsKey: '0x98eeeef678dbe7ed19c7ea94717cc149fc4a614eee28704860f8a1775f3c423293b603bc2f80eddb550b14b8248988ca',
+      blsKey: '0xa1890c97b0c9d5ca5277d58503e69db730a9d8123e81f3851de6ee4e4fab8bfe0b3ab9593d6a0249db56284abd8dd707',
     }
   ]
 }
