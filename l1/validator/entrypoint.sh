@@ -17,6 +17,11 @@ if [ -n "$ETHERBASE" ]; then
   OPTS="$OPTS --vote=true --blswallet=$BLS_WALLET/wallet --blspassword=$BLS_WALLET/password.txt --vote-journal-path=$VOTEJOURNAL"
 fi
 
+# To prevent blob freeze error of genesis block,
+# avoid cancun start from the genesis block
+# CANCUN_TIME=$(($(date +%s) + 30))
+# OPTS="$OPTS --override.cancun $CANCUN_TIME --override.minforblobrequest 2300 --override.defaultextrareserve 200 --override.immutabilitythreshold 2150"
+
 exec geth \
   --keystore $KEYSTORE --bootnodes $BOOTNODES \
   --syncmode full --gcmode archive --networkid $NETWORK_ID \
