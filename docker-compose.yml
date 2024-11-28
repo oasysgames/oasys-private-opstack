@@ -19,11 +19,25 @@ x-l1-geth: &l1-geth
   entrypoint: /bin/sh /l1/validator/entrypoint.sh
 
 x-l1-geth-env: &l1-geth-env
-  NETWORK_ID: $L1_CHAIN_ID
-  KEYSTORE: /l1/validator/keystore
   GENESIS: /l1/validator/genesis.json
-  VOTEJOURNAL: /root/.ethereum
-  BOOTNODES: enode://e521ad93c7aa24a33a2e57a6be9c1e63ed39bd5a76245c5f8c004e7dac650adf70bee6354a7a9a83322cbb2f9458f6004259b6080ed4c5c3d689d4eef2e6a5a5@l1-rpc:30303
+  GETH_NETWORKID: $L1_CHAIN_ID
+  GETH_BOOTNODES: enode://e521ad93c7aa24a33a2e57a6be9c1e63ed39bd5a76245c5f8c004e7dac650adf70bee6354a7a9a83322cbb2f9458f6004259b6080ed4c5c3d689d4eef2e6a5a5@l1-rpc:30303
+  GETH_SYNCMODE: full
+  GETH_GCMODE: archive
+  GETH_KEYSTORE: /l1/validator/keystore
+  GETH_PASSWORD: /dev/null
+  GETH_ALLOW_INSECURE_UNLOCK: 'true'
+  GETH_BLSWALLET: /l1/validator/bls/wallet
+  GETH_BLSPASSWORD: /l1/validator/blspassword.txt
+  GETH_HTTP: 'true'
+  GETH_HTTP_ADDR: 0.0.0.0
+  GETH_HTTP_VHOSTS: '*'
+  GETH_HTTP_CORSDOMAIN: '*'
+  GETH_HTTP_API: net,eth,web3,txpool,debug,admin
+  GETH_WS: 'true'
+  GETH_WS_ADDR: 0.0.0.0
+  GETH_WS_ORIGINS: '*'
+  GETH_WS_API: net,eth,web3,txpool,debug,admin
 
 services:
   # L1 Services
@@ -35,6 +49,7 @@ services:
       L1_CHAIN_ID: $L1_CHAIN_ID
       L1_RPC: 'http://127.0.0.1:$L1_ETH_RPC_HTTP_PORT/'
       L1_EXPLORER: 'http://127.0.0.1:$L1_BLOCKSCOUT_PORT/'
+      L1_WEB_PORT: $L1_WEB_PORT
       OP_CHAIN_ID: $OP_CHAIN_ID
       OP_RPC: 'http://127.0.0.1:$OP_ETH_RPC_HTTP_PORT/'
       OP_EXPLORER: 'http://127.0.0.1:$OP_BLOCKSCOUT_PORT/'
@@ -42,6 +57,7 @@ services:
       - ./l1/web/index.html:/usr/share/nginx/html/index.html:ro
       - ./l1/web/abis.js:/usr/share/nginx/html/abis.js:ro
       - ./l1/web/99-create-config.sh:/docker-entrypoint.d/99-create-config.sh:ro
+      - ./l1/web/nginx.conf:/etc/nginx/conf.d/default.conf:ro
     ports:
       - $L1_WEB_PORT:80/tcp
 
@@ -51,9 +67,9 @@ services:
     environment:
       <<: *l1-geth-env
       OPTS: '--rpc.allow-unprotected-txs'
-      NODEKEY: d0abe73e1fcef53dbbb5a9289cec5a15b58781b3503f284a2154e115f2f2d38f
+      NODE_KEY: d0abe73e1fcef53dbbb5a9289cec5a15b58781b3503f284a2154e115f2f2d38f
     volumes:
-      - ./l1:/l1:ro
+      - ./l1:/l1
       - $L1_GETH_REPO/build/bin:/usr/local/bin:ro
       - ./data/l1-rpc:/root/.ethereum
     ports:
@@ -67,7 +83,7 @@ services:
     environment:
       <<: *l1-geth-env
       ETHERBASE: '0xA889698683900857FA9AC54FBC972e88292b5387'
-      BLS_WALLET: /l1/validator/bls/l1-validator1/bls
+      VOTE_KEY: abnormally-full-bear
     volumes:
       - ./l1:/l1:ro
       - $L1_GETH_REPO/build/bin:/usr/local/bin:ro
@@ -79,7 +95,7 @@ services:
     environment:
       <<: *l1-geth-env
       ETHERBASE: '0xB07F340E051cc0db4d9d4fD115B148993994DddD'
-      BLS_WALLET: /l1/validator/bls/l1-validator2/bls
+      VOTE_KEY: seemingly-factual-vulture
     volumes:
       - ./l1:/l1:ro
       - $L1_GETH_REPO/build/bin:/usr/local/bin:ro
@@ -91,7 +107,7 @@ services:
     environment:
       <<: *l1-geth-env
       ETHERBASE: '0x9a8490E0faE649cA0ED0b221E4FadCa9a44Cd93e'
-      BLS_WALLET: /l1/validator/bls/l1-validator3/bls
+      VOTE_KEY: terribly-free-gull
     volumes:
       - ./l1:/l1:ro
       - $L1_GETH_REPO/build/bin:/usr/local/bin:ro

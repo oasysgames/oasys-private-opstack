@@ -1,6 +1,37 @@
 const EnvironmentABI = [
   {
     inputs: [],
+    name: "AlreadyInitialized",
+    type: "error",
+  },
+  {
+    inputs: [],
+    name: "OnlyBlockProducer",
+    type: "error",
+  },
+  {
+    inputs: [],
+    name: "OnlyNotLastBlock",
+    type: "error",
+  },
+  {
+    inputs: [],
+    name: "PastEpoch",
+    type: "error",
+  },
+  {
+    inputs: [
+      {
+        internalType: "string",
+        name: "detail",
+        type: "string",
+      },
+    ],
+    name: "ValidationError",
+    type: "error",
+  },
+  {
+    inputs: [],
     name: "epoch",
     outputs: [
       {
@@ -136,6 +167,19 @@ const EnvironmentABI = [
     name: "initialize",
     outputs: [],
     stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "initialized",
+    outputs: [
+      {
+        internalType: "bool",
+        name: "",
+        type: "bool",
+      },
+    ],
+    stateMutability: "view",
     type: "function",
   },
   {
@@ -285,6 +329,25 @@ const EnvironmentABI = [
     type: "function",
   },
   {
+    inputs: [
+      {
+        internalType: "uint256",
+        name: "",
+        type: "uint256",
+      },
+    ],
+    name: "updates",
+    outputs: [
+      {
+        internalType: "uint256",
+        name: "",
+        type: "uint256",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
     inputs: [],
     name: "value",
     outputs: [
@@ -344,9 +407,179 @@ const EnvironmentABI = [
     stateMutability: "view",
     type: "function",
   },
+  {
+    inputs: [
+      {
+        internalType: "uint256",
+        name: "",
+        type: "uint256",
+      },
+    ],
+    name: "values",
+    outputs: [
+      {
+        internalType: "uint256",
+        name: "startBlock",
+        type: "uint256",
+      },
+      {
+        internalType: "uint256",
+        name: "startEpoch",
+        type: "uint256",
+      },
+      {
+        internalType: "uint256",
+        name: "blockPeriod",
+        type: "uint256",
+      },
+      {
+        internalType: "uint256",
+        name: "epochPeriod",
+        type: "uint256",
+      },
+      {
+        internalType: "uint256",
+        name: "rewardRate",
+        type: "uint256",
+      },
+      {
+        internalType: "uint256",
+        name: "commissionRate",
+        type: "uint256",
+      },
+      {
+        internalType: "uint256",
+        name: "validatorThreshold",
+        type: "uint256",
+      },
+      {
+        internalType: "uint256",
+        name: "jailThreshold",
+        type: "uint256",
+      },
+      {
+        internalType: "uint256",
+        name: "jailPeriod",
+        type: "uint256",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
 ];
 
 const StakeManagerABI = [
+  {
+    inputs: [],
+    name: "AlreadyClaimed",
+    type: "error",
+  },
+  {
+    inputs: [],
+    name: "AlreadyInUse",
+    type: "error",
+  },
+  {
+    inputs: [],
+    name: "AlreadyInitialized",
+    type: "error",
+  },
+  {
+    inputs: [],
+    name: "AlreadyJoined",
+    type: "error",
+  },
+  {
+    inputs: [],
+    name: "AmountMismatched",
+    type: "error",
+  },
+  {
+    inputs: [],
+    name: "EmptyAddress",
+    type: "error",
+  },
+  {
+    inputs: [],
+    name: "EmptyBLS",
+    type: "error",
+  },
+  {
+    inputs: [],
+    name: "InvalidBLSLength",
+    type: "error",
+  },
+  {
+    inputs: [],
+    name: "Locked",
+    type: "error",
+  },
+  {
+    inputs: [],
+    name: "NoAmount",
+    type: "error",
+  },
+  {
+    inputs: [],
+    name: "NotZeroAmount",
+    type: "error",
+  },
+  {
+    inputs: [],
+    name: "ObsoletedMethod",
+    type: "error",
+  },
+  {
+    inputs: [],
+    name: "OnlyBlockProducer",
+    type: "error",
+  },
+  {
+    inputs: [],
+    name: "OnlyNotLastBlock",
+    type: "error",
+  },
+  {
+    inputs: [],
+    name: "PastEpoch",
+    type: "error",
+  },
+  {
+    inputs: [],
+    name: "SameAsOwner",
+    type: "error",
+  },
+  {
+    inputs: [],
+    name: "StakerDoesNotExist",
+    type: "error",
+  },
+  {
+    inputs: [
+      {
+        internalType: "enum Token.Type",
+        name: "token",
+        type: "uint8",
+      },
+    ],
+    name: "TransferFailed",
+    type: "error",
+  },
+  {
+    inputs: [],
+    name: "UnauthorizedSender",
+    type: "error",
+  },
+  {
+    inputs: [],
+    name: "UnknownToken",
+    type: "error",
+  },
+  {
+    inputs: [],
+    name: "ValidatorDoesNotExist",
+    type: "error",
+  },
   {
     anonymous: false,
     inputs: [
@@ -358,6 +591,31 @@ const StakeManagerABI = [
       },
     ],
     name: "AddedRewardBalance",
+    type: "event",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: true,
+        internalType: "address",
+        name: "validator",
+        type: "address",
+      },
+      {
+        indexed: false,
+        internalType: "bytes",
+        name: "oldBLSPublicKey",
+        type: "bytes",
+      },
+      {
+        indexed: false,
+        internalType: "bytes",
+        name: "newBLSPublicKey",
+        type: "bytes",
+      },
+    ],
+    name: "BLSPublicKeyUpdated",
     type: "event",
   },
   {
@@ -447,31 +705,6 @@ const StakeManagerABI = [
     ],
     name: "OperatorUpdated",
     type: "event",
-  },
-  {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: true,
-        internalType: "address",
-        name: "validator",
-        type: "address"
-      },
-      {
-        indexed: false,
-        internalType: "bytes",
-        name: "oldBLSPublicKey",
-        type: "bytes"
-      },
-      {
-        indexed: false,
-        internalType: "bytes",
-        name: "newBLSPublicKey",
-        type: "bytes"
-      }
-    ],
-    name: "BLSPublicKeyUpdated",
-    type: "event"
   },
   {
     anonymous: false,
@@ -694,10 +927,55 @@ const StakeManagerABI = [
     type: "function",
   },
   {
+    inputs: [],
+    name: "allowlist",
+    outputs: [
+      {
+        internalType: "contract IAllowlist",
+        name: "",
+        type: "address",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "bytes32",
+        name: "",
+        type: "bytes32",
+      },
+    ],
+    name: "blsPublicKeyToOwner",
+    outputs: [
+      {
+        internalType: "address",
+        name: "",
+        type: "address",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "candidateManager",
+    outputs: [
+      {
+        internalType: "contract ICandidateValidatorManager",
+        name: "",
+        type: "address",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
     inputs: [
       {
         internalType: "address",
-        name: "validator",
+        name: "",
         type: "address",
       },
       {
@@ -728,7 +1006,7 @@ const StakeManagerABI = [
     inputs: [
       {
         internalType: "address",
-        name: "staker",
+        name: "",
         type: "address",
       },
       {
@@ -751,7 +1029,7 @@ const StakeManagerABI = [
     inputs: [
       {
         internalType: "address",
-        name: "staker",
+        name: "",
         type: "address",
       },
     ],
@@ -776,6 +1054,19 @@ const StakeManagerABI = [
     name: "deactivateValidator",
     outputs: [],
     stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "environment",
+    outputs: [
+      {
+        internalType: "contract IEnvironment",
+        name: "",
+        type: "address",
+      },
+    ],
+    stateMutability: "view",
     type: "function",
   },
   {
@@ -886,7 +1177,7 @@ const StakeManagerABI = [
         type: "uint256",
       },
     ],
-    stateMutability: "nonpayable",
+    stateMutability: "view",
     type: "function",
   },
   {
@@ -1018,7 +1309,7 @@ const StakeManagerABI = [
     outputs: [
       {
         internalType: "address[]",
-        name: "validators",
+        name: "_validators",
         type: "address[]",
       },
       {
@@ -1062,7 +1353,7 @@ const StakeManagerABI = [
     outputs: [
       {
         internalType: "address[]",
-        name: "stakers",
+        name: "_stakers",
         type: "address[]",
       },
       {
@@ -1078,7 +1369,7 @@ const StakeManagerABI = [
     inputs: [
       {
         internalType: "address[]",
-        name: "validators",
+        name: "_validators",
         type: "address[]",
       },
       {
@@ -1189,8 +1480,8 @@ const StakeManagerABI = [
       {
         internalType: "bytes",
         name: "blsPublicKey",
-        type: "bytes"
-      }
+        type: "bytes",
+      },
     ],
     stateMutability: "view",
     type: "function",
@@ -1275,7 +1566,7 @@ const StakeManagerABI = [
     outputs: [
       {
         internalType: "address[]",
-        name: "stakers",
+        name: "_stakers",
         type: "address[]",
       },
       {
@@ -1330,7 +1621,7 @@ const StakeManagerABI = [
       {
         internalType: "bytes[]",
         name: "blsPublicKeys",
-        type: "bytes[]"
+        type: "bytes[]",
       },
       {
         internalType: "bool[]",
@@ -1365,6 +1656,19 @@ const StakeManagerABI = [
     type: "function",
   },
   {
+    inputs: [],
+    name: "initialized",
+    outputs: [
+      {
+        internalType: "bool",
+        name: "",
+        type: "bool",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
     inputs: [
       {
         internalType: "address",
@@ -1375,6 +1679,25 @@ const StakeManagerABI = [
     name: "joinValidator",
     outputs: [],
     stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "",
+        type: "address",
+      },
+    ],
+    name: "operatorToOwner",
+    outputs: [
+      {
+        internalType: "address",
+        name: "",
+        type: "address",
+      },
+    ],
+    stateMutability: "view",
     type: "function",
   },
   {
@@ -1452,18 +1775,94 @@ const StakeManagerABI = [
   {
     inputs: [
       {
+        internalType: "uint256",
+        name: "",
+        type: "uint256",
+      },
+    ],
+    name: "stakeAmounts",
+    outputs: [
+      {
+        internalType: "uint256",
+        name: "",
+        type: "uint256",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "uint256",
+        name: "",
+        type: "uint256",
+      },
+    ],
+    name: "stakeUpdates",
+    outputs: [
+      {
+        internalType: "uint256",
+        name: "",
+        type: "uint256",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "uint256",
+        name: "",
+        type: "uint256",
+      },
+    ],
+    name: "stakerSigners",
+    outputs: [
+      {
         internalType: "address",
-        name: "validator",
+        name: "",
+        type: "address",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "",
+        type: "address",
+      },
+    ],
+    name: "stakers",
+    outputs: [
+      {
+        internalType: "address",
+        name: "signer",
+        type: "address",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "",
         type: "address",
       },
       {
         internalType: "enum Token.Type",
-        name: "token",
+        name: "",
         type: "uint8",
       },
       {
         internalType: "uint256",
-        name: "amount",
+        name: "",
         type: "uint256",
       },
     ],
@@ -1498,6 +1897,19 @@ const StakeManagerABI = [
   {
     inputs: [
       {
+        internalType: "bytes",
+        name: "blsPublicKey",
+        type: "bytes",
+      },
+    ],
+    name: "updateBLSPublicKey",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
         internalType: "address",
         name: "operator",
         type: "address",
@@ -1511,19 +1923,95 @@ const StakeManagerABI = [
   {
     inputs: [
       {
+        internalType: "uint256",
+        name: "",
+        type: "uint256",
+      },
+    ],
+    name: "validatorOwners",
+    outputs: [
+      {
+        internalType: "address",
+        name: "",
+        type: "address",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "",
+        type: "address",
+      },
+    ],
+    name: "validators",
+    outputs: [
+      {
+        internalType: "address",
+        name: "owner",
+        type: "address",
+      },
+      {
+        internalType: "address",
+        name: "operator",
+        type: "address",
+      },
+      {
+        internalType: "uint256",
+        name: "lastClaimCommission",
+        type: "uint256",
+      },
+      {
         internalType: "bytes",
         name: "blsPublicKey",
-        type: "bytes"
-      }
+        type: "bytes",
+      },
     ],
-    name: "updateBLSPublicKey",
-    outputs: [],
-    stateMutability: "nonpayable",
-    type: "function"
+    stateMutability: "view",
+    type: "function",
   },
 ];
 
 const CandidateManagerABI = [
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "_environment",
+        type: "address",
+      },
+      {
+        internalType: "address",
+        name: "_stakeManager",
+        type: "address",
+      },
+      {
+        internalType: "address",
+        name: "_highStakes",
+        type: "address",
+      },
+    ],
+    stateMutability: "nonpayable",
+    type: "constructor",
+  },
+  {
+    inputs: [],
+    name: "NullAddress",
+    type: "error",
+  },
+  {
+    inputs: [],
+    name: "PastEpoch",
+    type: "error",
+  },
+  {
+    inputs: [],
+    name: "UnauthorizedSender",
+    type: "error",
+  },
   {
     inputs: [
       {
@@ -1535,6 +2023,19 @@ const CandidateManagerABI = [
     name: "afterStakeUpdate",
     outputs: [],
     stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "environment",
+    outputs: [
+      {
+        internalType: "contract IEnvironment",
+        name: "",
+        type: "address",
+      },
+    ],
+    stateMutability: "view",
     type: "function",
   },
   {
@@ -1581,6 +2082,11 @@ const CandidateManagerABI = [
         internalType: "uint256[]",
         name: "stakes",
         type: "uint256[]",
+      },
+      {
+        internalType: "bytes[]",
+        name: "blsPublicKeys",
+        type: "bytes[]",
       },
       {
         internalType: "bool[]",
@@ -1642,6 +2148,11 @@ const CandidateManagerABI = [
         type: "uint256[]",
       },
       {
+        internalType: "bytes[]",
+        name: "blsPublicKeys",
+        type: "bytes[]",
+      },
+      {
         internalType: "bool[]",
         name: "candidates",
         type: "bool[]",
@@ -1650,6 +2161,32 @@ const CandidateManagerABI = [
         internalType: "uint256",
         name: "newCursor",
         type: "uint256",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "highStakes",
+    outputs: [
+      {
+        internalType: "contract IAddressList",
+        name: "",
+        type: "address",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "stakeManager",
+    outputs: [
+      {
+        internalType: "contract IStakeManager",
+        name: "",
+        type: "address",
       },
     ],
     stateMutability: "view",
