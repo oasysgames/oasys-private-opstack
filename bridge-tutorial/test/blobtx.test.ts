@@ -5,8 +5,7 @@ import * as crypto from "crypto";
 import { privateKeyToAccount } from 'viem/accounts'
 
 // Define the byte size for random data
-const BYTE_SIZE =131072; // Adjust this value as needed
-// const BYTE_SIZE =32; // Adjust this value as needed
+const BYTE_SIZE =131072 - 5120; // Adjust this value as needed
 const INTERVAL = 1000; // 1000ms interval
 
 const privateKey = process.env.PRIVATE_KEY!;
