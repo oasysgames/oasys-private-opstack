@@ -6,9 +6,11 @@
   "devDependencies": {
     "@eth-optimism/sdk": "^3.1.5",
     "@types/node": "^20.9.0",
+    "c-kzg": "^2.1.2",
     "commander": "^11.1.0",
     "ethers": "^5.7.2",
     "ts-node": "^10.9.1",
-    "typescript": "^5.2.2"
+    "typescript": "^5.2.2",
+    "viem": "^2.21.35"
   }
 }

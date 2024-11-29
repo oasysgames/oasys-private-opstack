@@ -68,6 +68,7 @@ services:
       <<: *l1-geth-env
       OPTS: '--rpc.allow-unprotected-txs'
       NODE_KEY: d0abe73e1fcef53dbbb5a9289cec5a15b58781b3503f284a2154e115f2f2d38f
+      ENABLE_FAKEBEACON: 'true'
     volumes:
       - ./l1:/l1
       - $L1_GETH_REPO/build/bin:/usr/local/bin:ro
@@ -75,6 +76,7 @@ services:
     ports:
       - $L1_ETH_RPC_HTTP_PORT:8545/tcp
       - $L1_ETH_RPC_WS_PORT:8546/tcp
+      - $L1_ETH_BEACON_PORT:8686/tcp
 
   ## Validator(1)
   l1-validator1:
