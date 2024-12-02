@@ -18,6 +18,12 @@ git clone https://github.com/oasysgames/oasys-opstack.git
 git clone https://github.com/oasysgames/oasys-op-geth.git
 
 git clone https://github.com/oasysgames/opstack-message-relayer
+
+git clone https://github.com/blockscout/blockscout.git
+(cd blockscout && git checkout v6.9.2-beta)
+
+git clone https://github.com/blockscout/frontend.git blockscout-frontend
+(cd blockscout-frontend && git checkout v1.36.4)
 ```
 
 The `oasys-validator` repository checks out a release tag for a testnet that allows for free contract deployment.
@@ -44,6 +50,8 @@ L1_GETH_REPO=<oasys-validator>
 OP_MONO_REPO=<oasys-opstack>
 OP_GETH_REPO=<oasys-op-geth>
 MR_REPO=<opstack-message-layer>
+BS_BACKEND_REPO=
+BS_FRONTEND_REPO=
 ```
 
 ### Build components
@@ -55,6 +63,9 @@ docker-compose -f ./docker-compose.build.yml up
 
 # build a specific component (fast)
 docker-compose -f ./docker-compose.build.yml up {l1-geth,op-geth,op-node,op-batcher,op-proposer,message-relayer}
+
+# Blockscout should use `build`, not `up`
+docker-compose -f ./docker-compose.build.yml build blockscout-backend blockscout-frontend
 ```
 
 The built binaries are created within each repository.
@@ -71,7 +82,7 @@ The built binaries are created within each repository.
 
 Run services of L1.
 ```shell
-docker-compose up -d l1-web l1-rpc l1-validator1 l1-blockscout
+docker-compose up -d l1-web l1-rpc l1-validator1 l1-blockscout-backend l1-blockscout-frontend
 ```
 
 > l1-validator2 and l1-validator3 are optional.
@@ -167,7 +178,7 @@ INFO [11-09|16:06:49.261] Successfully wrote genesis state         database=ligh
 
 Run services of OP Stack.
 ```shell
-docker-compose up -d op-geth op-node op-batcher op-proposer op-blockscout message-relayer
+docker-compose up -d op-geth op-node op-batcher op-proposer op-blockscout-backend op-blockscout-frontend  message-relayer
 ```
 
 Open the OP Stack explorer ([http://127.0.0.1:4001/](http://127.0.0.1:4001/)). If op-geth and op-node are running correctly, blocks should be being created every 5 seconds.
@@ -192,7 +203,7 @@ docker-compose run --rm op-geth-replica init /op-node/genesis.json
 
 Run replica services.
 ```shell
-docker-compose up -d op-geth-replica op-node-replica op-blockscout-replica
+docker-compose up -d op-geth-replica op-node-replica
 ```
 
 Open the replica explorer ([http://127.0.0.1:4002/](http://127.0.0.1:4002/)). L2 block is synchronized with about a 1-minute delay. Synchronization can be sped up by reducing the `--verifier.l1-confs` in the op-node-replica service.

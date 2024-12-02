@@ -115,22 +115,15 @@ services:
       - ./data/l1-validator3:/root/.ethereum
 
   ## Explorer
-  l1-blockscout:
+  l1-blockscout-backend:
     <<: *resident
-    image: ghcr.io/oasysgames/oasys-blockscout:v5.2.2-beta
+    image: blockscout-backend:v6.9.2-beta
+    command: sh -c "bin/blockscout eval \"Elixir.Explorer.ReleaseTasks.create_and_migrate()\" && bin/blockscout start"
     environment:
+      # Basic Settings
       NETWORK: ' '
       SUBNETWORK: 'Private Hub-Layer'
-      ETHEREUM_JSONRPC_VARIANT: geth
-      ETHEREUM_JSONRPC_HTTP_URL: $L1_ETH_RPC_HTTP
-      ETHEREUM_JSONRPC_TRACE_URL: $L1_ETH_RPC_HTTP
-      ETHEREUM_JSONRPC_WS_URL: $L1_ETH_RPC_WS
-      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/l1_blockscout?ssl=false
       ECTO_USE_SSL: 'false'
-      POOL_SIZE: 10
-      POOL_SIZE_API: 10
-      ACCOUNT_POOL_SIZE: 10
-      SUPPORTED_CHAINS: '[]'
       CHAIN_SPEC_PATH: /l1/validator/genesis.json
       PORT: $L1_BLOCKSCOUT_PORT
       SECRET_KEY_BASE: 'nfbREqcUrUW2IxWBHP6KbivqQiou/9id/Yca5eIqT0shcBiFltwbRkhq7pjzez14'
@@ -141,6 +134,61 @@ services:
       API_URL: http://127.0.0.1:$L1_BLOCKSCOUT_PORT
       CSV_DOC_LINK: 'https://docs.oasys.games/docs/staking/explore/1-2-csv-download'
       RE_CAPTCHA_DISABLED: 'true'
+      CHAIN_ID: $L1_CHAIN_ID
+      JSON_RPC: http://127.0.0.1:$L1_ETH_RPC_HTTP_PORT
+      FIRST_BLOCK: 2
+      # DB Settings
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/l1_blockscout?ssl=false
+      POOL_SIZE: 10
+      POOL_SIZE_API: 10
+      ACCOUNT_POOL_SIZE: 10
+      # RPC Settings
+      ETHEREUM_JSONRPC_VARIANT: geth
+      ETHEREUM_JSONRPC_HTTP_URL: $L1_ETH_RPC_HTTP
+      ETHEREUM_JSONRPC_TRACE_URL: $L1_ETH_RPC_HTTP
+      ETHEREUM_JSONRPC_WS_URL: $L1_ETH_RPC_WS
+      ETHEREUM_JSONRPC_DEBUG_TRACE_TRANSACTION_TIMEOUT: 15s
+      # UI Settings
+      APPS_MENU: 'true'
+      SUPPORTED_CHAINS: '[]'
+      SHOW_ADDRESS_MARKETCAP_PERCENTAGE: 'false'
+      SHOW_MAINTENANCE_ALERT: 'false'
+      SHOW_PRICE_CHART: 'false'
+      SHOW_PRICE_CHART_LEGEND: 'false'
+      SHOW_TENDERLY_LINK: 'false'
+      SHOW_TXS_CHART: 'true'
+      # API Settings
+      API_V2_ENABLED: 'true'
+      # Indexer Settings
+      ACCOUNT_ENABLED: 'false'
+      COIN_BALANCE_HISTORY_DAYS: 30
+      DISABLE_EXCHANGE_RATES: 'true'
+      DISABLE_REALTIME_INDEXER: 'false'
+      # Performance Settings
+      TOKEN_ID_MIGRATION_BATCH_SIZE: 5
+      INDEXER_INTERNAL_TRANSACTIONS_BATCH_SIZE: 1
+      INDEXER_INTERNAL_TRANSACTIONS_CONCURRENCY: 1
+      INDEXER_EMPTY_BLOCKS_SANITIZER_BATCH_SIZE: 10
+      INDEXER_CATCHUP_BLOCKS_BATCH_SIZE: 1
+      INDEXER_CATCHUP_BLOCKS_CONCURRENCY: 1
+      INDEXER_RECEIPTS_BATCH_SIZE: 10
+      INDEXER_RECEIPTS_CONCURRENCY: 1
+      INDEXER_COIN_BALANCES_BATCH_SIZE: 10
+      INDEXER_COIN_BALANCES_CONCURRENCY: 1
+      INDEXER_BLOCK_REWARD_BATCH_SIZE: 1
+      INDEXER_BLOCK_REWARD_CONCURRENCY: 1
+      INDEXER_TOKEN_CONCURRENCY: 1
+      INDEXER_TOKEN_BALANCES_BATCH_SIZE: 10
+      INDEXER_TOKEN_BALANCES_CONCURRENCY: 1
+      INDEXER_TOKEN_INSTANCE_RETRY_CONCURRENCY: 1
+      INDEXER_TOKEN_INSTANCE_REALTIME_CONCURRENCY: 1
+      INDEXER_TOKEN_INSTANCE_SANITIZE_CONCURRENCY: 1
+      INDEXER_FETCHER_INIT_QUERY_LIMIT: 1
+      INDEXER_TOKEN_INSTANCE_RETRY_BATCH_SIZE: 1
+      INDEXER_TOKEN_INSTANCE_SANITIZE_BATCH_SIZE: 1
+      INDEXER_TOKEN_BALANCES_FETCHER_INIT_QUERY_LIMIT: 100
+      INDEXER_TOKEN_INSTANCE_LEGACY_SANITIZE_CONCURRENCY: 1
+      INDEXER_TOKEN_INSTANCE_LEGACY_SANITIZE_BATCH_SIZE: 1
     volumes:
       - ./l1:/l1:ro
     ports:
@@ -150,6 +198,31 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+
+  l1-blockscout-frontend:
+    <<: *resident
+    image: blockscout-frontend:v1.36.4
+    environment:
+      PORT: $L1_BLOCKSCOUT_FRONTEND_PORT
+      NEXT_PUBLIC_IS_TESTNET: 'true'
+      NEXT_PUBLIC_APP_PROTOCOL: http
+      NEXT_PUBLIC_APP_HOST: 127.0.0.1:$L1_BLOCKSCOUT_FRONTEND_PORT
+      # Backend Settings
+      NEXT_PUBLIC_API_PROTOCOL: http
+      NEXT_PUBLIC_API_WEBSOCKET_PROTOCOL: ws
+      NEXT_PUBLIC_API_HOST: 127.0.0.1:$L1_BLOCKSCOUT_PORT
+      # WalletConnect Settings
+      NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID: 1
+      NEXT_PUBLIC_NETWORK_RPC_URL: http://127.0.0.1:$L1_ETH_RPC_HTTP_PORT
+      NEXT_PUBLIC_NETWORK_NAME: 'Private Hub-Layer'
+      NEXT_PUBLIC_NETWORK_SHORT_NAME: 'Private Hub-Layer'
+      NEXT_PUBLIC_NETWORK_ID: $L1_CHAIN_ID
+      NEXT_PUBLIC_NETWORK_CURRENCY_NAME: OAS
+      NEXT_PUBLIC_NETWORK_CURRENCY_SYMBOL: OAS
+      # UI Settings
+      NEXT_PUBLIC_HOMEPAGE_CHARTS: '["daily_txs"]'
+    ports:
+      - $L1_BLOCKSCOUT_FRONTEND_PORT:$L1_BLOCKSCOUT_FRONTEND_PORT/tcp
 
   # OP Stack Services
   op-geth:
@@ -276,22 +349,15 @@ services:
       - ./l1:/l1:ro
       - ./data/instant-verifier:/data
 
-  op-blockscout:
+  op-blockscout-backend:
     <<: *resident
-    image: ghcr.io/oasysgames/oasys-blockscout:v5.2.2-beta
+    image: blockscout-backend:v6.9.2-beta
+    command: sh -c "bin/blockscout eval \"Elixir.Explorer.ReleaseTasks.create_and_migrate()\" && bin/blockscout start"
     environment:
+      # Basic Settings
       NETWORK: ' '
-      SUBNETWORK: 'Private OP Stack'
-      ETHEREUM_JSONRPC_VARIANT: geth
-      ETHEREUM_JSONRPC_HTTP_URL: $OP_ETH_RPC_HTTP
-      ETHEREUM_JSONRPC_TRACE_URL: $OP_ETH_RPC_HTTP
-      ETHEREUM_JSONRPC_WS_URL: $OP_ETH_RPC_WS
-      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/l2_blockscout?ssl=false
+      SUBNETWORK: 'Private OPStack'
       ECTO_USE_SSL: 'false'
-      POOL_SIZE: 10
-      POOL_SIZE_API: 10
-      ACCOUNT_POOL_SIZE: 10
-      SUPPORTED_CHAINS: '[]'
       CHAIN_SPEC_PATH: /op-node/genesis.json
       PORT: $OP_BLOCKSCOUT_PORT
       SECRET_KEY_BASE: 'U6434qTISQ7ozqRb1kzstkJzyfgWRIwFTefjNWT9laHMbFE9oat5U4Tshptux5yl'
@@ -302,6 +368,60 @@ services:
       API_URL: http://127.0.0.1:$OP_BLOCKSCOUT_PORT
       CSV_DOC_LINK: 'https://docs.oasys.games/docs/staking/explore/1-2-csv-download'
       RE_CAPTCHA_DISABLED: 'true'
+      CHAIN_ID: $OP_CHAIN_ID
+      JSON_RPC: http://127.0.0.1:$OP_ETH_RPC_HTTP_PORT
+      # DB Settings
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/l2_blockscout?ssl=false
+      POOL_SIZE: 10
+      POOL_SIZE_API: 10
+      ACCOUNT_POOL_SIZE: 10
+      # RPC Settings
+      ETHEREUM_JSONRPC_VARIANT: geth
+      ETHEREUM_JSONRPC_HTTP_URL: $OP_ETH_RPC_HTTP
+      ETHEREUM_JSONRPC_TRACE_URL: $OP_ETH_RPC_HTTP
+      ETHEREUM_JSONRPC_WS_URL: $OP_ETH_RPC_WS
+      ETHEREUM_JSONRPC_DEBUG_TRACE_TRANSACTION_TIMEOUT: 15s
+      # UI Settings
+      APPS_MENU: 'true'
+      SUPPORTED_CHAINS: '[]'
+      SHOW_ADDRESS_MARKETCAP_PERCENTAGE: 'false'
+      SHOW_MAINTENANCE_ALERT: 'false'
+      SHOW_PRICE_CHART: 'false'
+      SHOW_PRICE_CHART_LEGEND: 'false'
+      SHOW_TENDERLY_LINK: 'false'
+      SHOW_TXS_CHART: 'true'
+      # API Settings
+      API_V2_ENABLED: 'true'
+      # Indexer Settings
+      ACCOUNT_ENABLED: 'false'
+      COIN_BALANCE_HISTORY_DAYS: 30
+      DISABLE_EXCHANGE_RATES: 'true'
+      DISABLE_REALTIME_INDEXER: 'false'
+      # Performance Settings
+      TOKEN_ID_MIGRATION_BATCH_SIZE: 5
+      INDEXER_INTERNAL_TRANSACTIONS_BATCH_SIZE: 1
+      INDEXER_INTERNAL_TRANSACTIONS_CONCURRENCY: 1
+      INDEXER_EMPTY_BLOCKS_SANITIZER_BATCH_SIZE: 10
+      INDEXER_CATCHUP_BLOCKS_BATCH_SIZE: 1
+      INDEXER_CATCHUP_BLOCKS_CONCURRENCY: 1
+      INDEXER_RECEIPTS_BATCH_SIZE: 10
+      INDEXER_RECEIPTS_CONCURRENCY: 1
+      INDEXER_COIN_BALANCES_BATCH_SIZE: 10
+      INDEXER_COIN_BALANCES_CONCURRENCY: 1
+      INDEXER_BLOCK_REWARD_BATCH_SIZE: 1
+      INDEXER_BLOCK_REWARD_CONCURRENCY: 1
+      INDEXER_TOKEN_CONCURRENCY: 1
+      INDEXER_TOKEN_BALANCES_BATCH_SIZE: 10
+      INDEXER_TOKEN_BALANCES_CONCURRENCY: 1
+      INDEXER_TOKEN_INSTANCE_RETRY_CONCURRENCY: 1
+      INDEXER_TOKEN_INSTANCE_REALTIME_CONCURRENCY: 1
+      INDEXER_TOKEN_INSTANCE_SANITIZE_CONCURRENCY: 1
+      INDEXER_FETCHER_INIT_QUERY_LIMIT: 1
+      INDEXER_TOKEN_INSTANCE_RETRY_BATCH_SIZE: 1
+      INDEXER_TOKEN_INSTANCE_SANITIZE_BATCH_SIZE: 1
+      INDEXER_TOKEN_BALANCES_FETCHER_INIT_QUERY_LIMIT: 100
+      INDEXER_TOKEN_INSTANCE_LEGACY_SANITIZE_CONCURRENCY: 1
+      INDEXER_TOKEN_INSTANCE_LEGACY_SANITIZE_BATCH_SIZE: 1
     volumes:
       - ./data/op-node:/op-node:ro
     ports:
@@ -311,6 +431,31 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+
+  op-blockscout-frontend:
+    <<: *resident
+    image: blockscout-frontend:v1.36.4
+    environment:
+      PORT: $OP_BLOCKSCOUT_FRONTEND_PORT
+      NEXT_PUBLIC_IS_TESTNET: 'true'
+      NEXT_PUBLIC_APP_PROTOCOL: http
+      NEXT_PUBLIC_APP_HOST: 127.0.0.1:$OP_BLOCKSCOUT_FRONTEND_PORT
+      # Backend Settings
+      NEXT_PUBLIC_API_PROTOCOL: http
+      NEXT_PUBLIC_API_WEBSOCKET_PROTOCOL: ws
+      NEXT_PUBLIC_API_HOST: 127.0.0.1:$OP_BLOCKSCOUT_PORT
+      # WalletConnect Settings
+      NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID: 1
+      NEXT_PUBLIC_NETWORK_RPC_URL: http://127.0.0.1:$OP_ETH_RPC_HTTP_PORT
+      NEXT_PUBLIC_NETWORK_NAME: 'Private OPStack'
+      NEXT_PUBLIC_NETWORK_SHORT_NAME: 'Private OPStack'
+      NEXT_PUBLIC_NETWORK_ID: $OP_CHAIN_ID
+      NEXT_PUBLIC_NETWORK_CURRENCY_NAME: OAS
+      NEXT_PUBLIC_NETWORK_CURRENCY_SYMBOL: OAS
+      # UI Settings
+      NEXT_PUBLIC_HOMEPAGE_CHARTS: '["daily_txs"]'
+    ports:
+      - $OP_BLOCKSCOUT_FRONTEND_PORT:$OP_BLOCKSCOUT_FRONTEND_PORT/tcp
 
   # OP Stack Replica Services
   op-geth-replica:
@@ -378,42 +523,6 @@ services:
     links:
       - l1-rpc
       - op-geth-replica
-
-  op-blockscout-replica:
-    <<: *resident
-    image: ghcr.io/oasysgames/oasys-blockscout:v5.2.2-beta
-    environment:
-      NETWORK: ' '
-      SUBNETWORK: 'Private OP Stack Replica'
-      ETHEREUM_JSONRPC_VARIANT: geth
-      ETHEREUM_JSONRPC_HTTP_URL: http://op-geth-replica:8545
-      ETHEREUM_JSONRPC_TRACE_URL: http://op-geth-replica:8545
-      ETHEREUM_JSONRPC_WS_URL: ws://op-geth-replica:8546
-      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/l2_blockscout_replica?ssl=false
-      ECTO_USE_SSL: 'false'
-      POOL_SIZE: 10
-      POOL_SIZE_API: 10
-      ACCOUNT_POOL_SIZE: 10
-      SUPPORTED_CHAINS: '[]'
-      CHAIN_SPEC_PATH: /op-node/genesis.json
-      PORT: $OP_BLOCKSCOUT_REPLICA_PORT
-      SECRET_KEY_BASE: 'U6434qTISQ7ozqRb1kzstkJzyfgWRIwFTefjNWT9laHMbFE9oat5U4Tshptux5yl'
-      COIN_NAME: OAS
-      BLOCKSCOUT_PROTOCOL: http
-      BLOCKSCOUT_HOST: 127.0.0.1:$OP_BLOCKSCOUT_REPLICA_PORT
-      WEBAPP_URL: http://127.0.0.1:$OP_BLOCKSCOUT_REPLICA_PORT
-      API_URL: http://127.0.0.1:$OP_BLOCKSCOUT_REPLICA_PORT
-      CSV_DOC_LINK: 'https://docs.oasys.games/docs/staking/explore/1-2-csv-download'
-      RE_CAPTCHA_DISABLED: 'true'
-    volumes:
-      - ./data/op-node:/op-node:ro
-    ports:
-      - $OP_BLOCKSCOUT_REPLICA_PORT:$OP_BLOCKSCOUT_REPLICA_PORT/tcp
-    links:
-      - op-geth-replica
-    depends_on:
-      postgres:
-        condition: service_healthy
 
   # Misc services
   postgres:

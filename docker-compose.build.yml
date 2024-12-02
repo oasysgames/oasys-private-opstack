@@ -62,3 +62,23 @@ services:
       - ./l2/message-relayer/build.sh:/app/build.sh
       # dependency cache
       - ./tmp/build-cache/message-relayer/pnpm-store:/tmp/pnpm-store
+
+  blockscout-backend:
+    image: blockscout-backend:v6.9.2-beta
+    build:
+      context: $BS_BACKEND_REPO
+      dockerfile: ./docker/Dockerfile
+      args:
+        RELEASE_VERSION: 6.9.2
+        CACHE_EXCHANGE_RATES_PERIOD: ''
+        API_V1_READ_METHODS_DISABLED: 'false'
+        DISABLE_WEBAPP: 'false'
+        API_V1_WRITE_METHODS_DISABLED: 'false'
+        CACHE_TOTAL_GAS_USAGE_COUNTER_ENABLED: ''
+        CACHE_ADDRESS_WITH_BALANCES_UPDATE_INTERVAL: ''
+        ADMIN_PANEL_ENABLED: ''
+
+  blockscout-frontend:
+    image: blockscout-frontend:v1.36.4
+    build:
+      context: $BS_FRONTEND_REPO
